@@ -9,22 +9,25 @@ class User {
     private String name;
     private String function;
     private String level;
+    private String password;
 
     public User() {
 
     }
 
-    User(String name, String function, String level) {
+    User(String name, String function, String level, String password) {
         this.name = name;
         this.function = function;
         this.level = level;
+        this.password = password;
     }
 
-    User(int id, String name, String function, String level) {
+    User(int id, String name, String function, String level, String password) {
         this.id = id;
         this.name = name;
         this.function = function;
         this.level = level;
+        this.password = password;
     }
 
     int getId() {
@@ -57,6 +60,14 @@ class User {
 
     public void setLevel(String level) {
         this.level = level;
+    }
+
+    String getPassword() {
+        return password;
+    }
+
+    void setPassword(String password) {
+        this.password = password;
     }
 }
 

@@ -48,6 +48,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_USER_NAME = "name";
     private static final String KEY_USER_FUNCTION = "function";
     private static final String KEY_USER_LEVEL = "level";
+    private static final String KEY_USER_PASSWORD = "password";
 
     DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -113,7 +114,9 @@ class DatabaseHandler extends SQLiteOpenHelper {
                 + TABLE_USERS + " ("
                 + KEY_USER_ID + " INTEGER PRIMARY KEY, "
                 + KEY_USER_NAME + " TEXT, "
-                + KEY_USER_FUNCTION + " TEXT)";
+                + KEY_USER_FUNCTION + " TEXT, "
+                + KEY_USER_LEVEL + " TEXT, "
+                + KEY_USER_PASSWORD + " TEXT )";
         db.execSQL(createUsers);
     }
 
@@ -166,16 +169,17 @@ class DatabaseHandler extends SQLiteOpenHelper {
 
     }
 
-    void addUser(User user) {
+    public void addUser(User user) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        int nextId = getMaxUserId();
+        int nextId = getMaxUserId() + 1;
 
         ContentValues values = new ContentValues();
-        values.put(KEY_USER_ID, user.getId());
+        values.put(KEY_USER_ID, nextId);
         values.put(KEY_USER_NAME, user.getName());
         values.put(KEY_USER_FUNCTION, user.getFunction());
         values.put(KEY_USER_LEVEL, user.getLevel());
+        values.put(KEY_USER_PASSWORD, user.getPassword());
 
         db.insert(TABLE_USERS, null, values);
         db.close();
@@ -207,7 +211,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(countedItem.getId())});
     }
 
-    public int updateBatch(Batch batch) {
+    int updateBatch(Batch batch) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -227,6 +231,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_USER_NAME, user.getName());
         values.put(KEY_USER_FUNCTION, user.getFunction());
         values.put(KEY_USER_LEVEL, user.getLevel());
+        values.put(KEY_USER_PASSWORD, user.getPassword());
 
         return db.update(TABLE_USERS, values, KEY_USER_ID + " =?",
                 new String[]{String.valueOf(user.getId())});
@@ -253,7 +258,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
         return product;
     }
 
-    public CountedItem getCountedItemById(int id) {
+    CountedItem getCountedItemById(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_COUNTEDITEMS,
@@ -301,7 +306,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         Cursor cursor = db.query(TABLE_USERS,
-                new String[]{KEY_USER_ID, KEY_USER_NAME, KEY_USER_FUNCTION, KEY_USER_LEVEL}, KEY_USER_ID + " =?",
+                new String[]{KEY_USER_ID, KEY_USER_NAME, KEY_USER_FUNCTION, KEY_USER_LEVEL, KEY_USER_PASSWORD}, KEY_USER_ID + " =?",
                 new String[]{String.valueOf(userId)}, null, null, null, null);
 
         if (cursor != null) {
@@ -312,7 +317,29 @@ class DatabaseHandler extends SQLiteOpenHelper {
                 cursor.getInt(cursor.getColumnIndex(KEY_USER_ID)),
                 cursor.getString(cursor.getColumnIndex(KEY_USER_NAME)),
                 cursor.getString(cursor.getColumnIndex(KEY_USER_FUNCTION)),
-                cursor.getString(cursor.getColumnIndex(KEY_USER_LEVEL)));
+                cursor.getString(cursor.getColumnIndex(KEY_USER_LEVEL)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_PASSWORD)));
+        cursor.close();
+        return user;
+    }
+
+    User getUserByName(String userName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = db.query(TABLE_USERS,
+                new String[]{KEY_USER_ID, KEY_USER_NAME, KEY_USER_FUNCTION, KEY_USER_LEVEL, KEY_USER_PASSWORD}, KEY_USER_NAME + " =?",
+                new String[]{String.valueOf(userName)}, null, null, null, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+
+        User user = new User(
+                cursor.getInt(cursor.getColumnIndex(KEY_USER_ID)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_NAME)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_FUNCTION)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_LEVEL)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_PASSWORD)));
         cursor.close();
         return user;
     }
@@ -443,7 +470,8 @@ class DatabaseHandler extends SQLiteOpenHelper {
                         cursor.getInt(cursor.getColumnIndex(KEY_USER_ID)),
                         cursor.getString(cursor.getColumnIndex(KEY_USER_NAME)),    // code
                         cursor.getString(cursor.getColumnIndex(KEY_USER_FUNCTION)),    // Description
-                        cursor.getString(cursor.getColumnIndex(KEY_USER_LEVEL)));      // sud
+                        cursor.getString(cursor.getColumnIndex(KEY_USER_LEVEL)),
+                        cursor.getString(cursor.getColumnIndex(KEY_USER_PASSWORD)));      // sud
                 userList.add(user);
             } while (cursor.moveToNext());
         }
@@ -567,4 +595,5 @@ class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
         return maxId;
     }
+
 }
