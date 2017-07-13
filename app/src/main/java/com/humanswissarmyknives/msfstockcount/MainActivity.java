@@ -41,13 +41,17 @@ class MainActivity extends AppCompatActivity {
 
         // init the db
         db = new DatabaseHandler(this);
+
 /*
 
         User myUser1 = new User(1, "Dillah", "SupplyLogassist", "Counter", "mypassword");
         User myUser2 = new User(2, "Dennis", "UF Trainer", "Admin", "234");
+        User myUser3 = new User(3, "Emma", "Outreach Nurse", "Counter", "123");
 
         db.addUser(myUser1);
+        db.addUser(myUser3);
         db.addUser(myUser2);
+
 */
 
 
@@ -66,9 +70,10 @@ class MainActivity extends AppCompatActivity {
         spinner = (Spinner) findViewById(R.id.spUser);
 
 // Application of the Array to the Spinner
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, users);
-        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down view
-        spinner.setAdapter(spinnerArrayAdapter);
+
+        ArrayAdapter<User> adapter = new ArrayAdapter<User>(getApplicationContext(), R.layout.spinner_user_item, arrayOfUsers);
+        adapter.setDropDownViewResource(R.layout.spinner_user_item);
+        spinner.setAdapter(adapter);
 
         EditText etPass = (EditText) findViewById(R.id.etPassword);
 
@@ -78,9 +83,9 @@ class MainActivity extends AppCompatActivity {
     void login(View view) {
 
         // check which user is selected and get the user object then check the object' password against the password in the etPass
-        String userName = String.valueOf(spinner.getSelectedItem());
+        currentUser = arrayOfUsers.get(spinner.getSelectedItemPosition());
 
-        currentUser = db.getUserByName(userName);
+        //currentUser = db.getUserByName(userName);
         EditText etPass = (EditText) findViewById(R.id.etPassword);
         String currentPass = etPass.getText().toString();
 
@@ -91,6 +96,7 @@ class MainActivity extends AppCompatActivity {
 
             startActivity(iGoToWarehouseList);
         } else {
+            etPass.setText("");
             passwordCounter++;
             remaining = remaining - 1;
             if (remaining > 0) {

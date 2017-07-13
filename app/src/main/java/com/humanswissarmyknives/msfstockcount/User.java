@@ -69,5 +69,11 @@ class User {
     void setPassword(String password) {
         this.password = password;
     }
+
+    // override the toString mthod to pass cool info for the spinner on the first screen
+    @Override
+    public String toString() {
+        return name + " (" + function + ")";
+    }
 }
 
