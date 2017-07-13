@@ -35,7 +35,7 @@
 
                 <Spinner
                     android:id="@+id/spUser"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1" />
             </LinearLayout>
@@ -63,7 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="login"
-                android:text="@string/start_counting"
+                android:text="@string/login"
                 tools:layout_editor_absoluteX="146dp"
                 tools:layout_editor_absoluteY="181dp" />
         </LinearLayout>

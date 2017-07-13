@@ -17,12 +17,13 @@ class ReportingList {
     }
 
     public ReportingList(String name, String comment, String category) {
+        this.id = 0;
         this.name = name;
         this.comment = comment;
         this.category = category;
     }
 
-    public ReportingList(int id, String name, String comment, String category) {
+    ReportingList(int id, String name, String comment, String category) {
         this.id = id;
         this.name = name;
         this.comment = comment;
@@ -53,11 +54,15 @@ class ReportingList {
         return name;
     }
 
-    public String getComment() {
+    String getComment() {
         return comment;
     }
 
-    public String getCategory() {
+    String getCategory() {
         return category;
+    }
+
+    public String toString() {
+        return category + " - " + name;
     }
 }

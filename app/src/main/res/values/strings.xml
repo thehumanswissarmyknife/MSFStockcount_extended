@@ -3,4 +3,7 @@
     <string name="stUserColon">User:</string>
     <string name="please_enter_the_password">Please enter the password</string>
     <string name="start_counting">Start Counting</string>
+    <string name="login">Login</string>
+    <string name="which_warehouse_will_you_be_counting_in">Which warehouse will you be counting in?</string>
+    <string name="please_select_the_list_you_are_counting_for">Please select the list you are counting for:</string>
 </resources>

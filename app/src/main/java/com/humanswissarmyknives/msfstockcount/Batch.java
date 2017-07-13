@@ -19,6 +19,7 @@ class Batch implements Comparable<Batch>{
     }
 
     private Batch(String product_code, String batch_number, String expiry_date, int batch_sud) {
+        this.batch_id = 0;
         this.product_code = product_code;
         this.expiry_date = expiry_date;
         this.batch_number = batch_number;

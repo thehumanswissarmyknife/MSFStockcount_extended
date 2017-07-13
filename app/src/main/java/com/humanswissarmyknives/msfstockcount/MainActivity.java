@@ -18,13 +18,13 @@ import java.util.Comparator;
 
 public class MainActivity extends AppCompatActivity {
 
-    Product currentProduct;
-    Batch currentBatch;
+    /*    Product currentProduct;
+        Batch currentBatch;*/
     User currentUser;
     DatabaseHandler db;
 
     ArrayList<User> arrayOfUsers;
-    Array array;
+/*    Array array;*/
 
     EditText etPass;
     Spinner spinner;
@@ -45,8 +45,8 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-/*
 
+/*
         Product myProduct1 = new Product("DORAPARA5T-", "PARACETAMOL (acetaminophen), 500 mg, tab.", 1000, 1);
         Product myProduct2 = new Product("DEXTARTS2RC", "ARTESUNATE, 200 mg, rectal caps.", 1000, 1);
         Product myProduct3 = new Product("DINFRINL1FBF1", "RINGER lactate, 1 l, flex. bag, PVC free", 12, 1);
@@ -61,15 +61,34 @@ public class MainActivity extends AppCompatActivity {
         db.addProduct(myProduct5);
 
 
-        User myUser1 = new User(1, "Dillah", "SupplyLogassist", "Counter", "mypassword");
-        User myUser2 = new User(2, "Dennis", "UF Trainer", "Admin", "234");
-        User myUser3 = new User(3, "Emma", "Outreach Nurse", "Counter", "123");
+        User myUser1 = new User(1, "Dillah", "SupplyLogassist", "Counter", "qwer");
+        User myUser2 = new User(2, "Dennis", "UF Trainer", "Admin", "asd");
+        User myUser3 = new User(3, "Emma", "Outreach Nurse", "Counter", "zxc");
 
         db.addUser(myUser1);
         db.addUser(myUser3);
         db.addUser(myUser2);
 
-*/
+        ReportingList myReportingList1 = new ReportingList(1, "MSR", "all medical items", "MED");
+        ReportingList myReportingList2 = new ReportingList(2, "LSR", "all log items", "LOG");
+        ReportingList myReportingList3 = new ReportingList(3, "MSR EPREP", "all medical items for emergencies", "MED");
+        ReportingList myReportingList4 = new ReportingList(4, "LSR ERU", "all log items of the emergency response unit", "LOG");
+
+
+        db.addReportingList(myReportingList1);
+        db.addReportingList(myReportingList2);
+        db.addReportingList(myReportingList3);
+        db.addReportingList(myReportingList4);
+/*
+        Warehouse myWarehouse1 = new Warehouse("Medical Warehouse", "MED", 1);
+        Warehouse myWarehouse2 = new Warehouse("Logstock", "LOG", 2);
+        Warehouse myWarehouse3 = new Warehouse("WatSan", "LOG", 2);
+
+        db.addWarehouse(myWarehouse1);
+        db.addWarehouse(myWarehouse2);
+        db.addWarehouse(myWarehouse3);
+
+
 /*
         Batch myBatch1 = new Batch("DINFRINL1FBF1", "PJKASDNK", "02/18", 12);
         Batch myBatch2 = new Batch("DINJCEFT2V-", "KLKJLJAKSDL", "02/18", 50);
@@ -120,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
         String currentPass = etPass.getText().toString();
 
         if (currentUser.getPassword().equals(currentPass)) {
-            Intent iGoToWarehouseList = new Intent(getApplicationContext(), ProductListActivity.class);
+            Intent iGoToWarehouseList = new Intent(getApplicationContext(), WarehouseReportListActivity.class);
 
             iGoToWarehouseList.putExtra("currentUserId", currentUser.getId());
 

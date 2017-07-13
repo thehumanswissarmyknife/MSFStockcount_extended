@@ -4,6 +4,7 @@ import android.content.Context;
 
 /**
  * Created by dennisvocke on 24.06.17.
+ * used for all products in the system
  */
 
 class Product implements Comparable<Product>{

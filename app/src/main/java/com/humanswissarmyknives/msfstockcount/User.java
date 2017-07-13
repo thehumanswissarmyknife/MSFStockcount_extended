@@ -16,6 +16,7 @@ class User {
     }
 
     User(String name, String function, String level, String password) {
+        this.id = 0;
         this.name = name;
         this.function = function;
         this.level = level;
