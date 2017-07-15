@@ -7,14 +7,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="12dp">
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="12dp">
 
         <TextView
             android:id="@+id/tvProductCode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="DORA..."
+            android:text=""
             android:textColor="@android:color/background_dark"
             android:textSize="18sp" />
 
@@ -22,7 +22,7 @@
             android:id="@+id/tvProductQty"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Total Qty: 12000"
+            android:text=""
             android:textAlignment="textEnd"
             android:layout_gravity="end"
             android:textColor="@android:color/background_dark"
@@ -32,21 +32,21 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="12dp">
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="12dp">
 
         <TextView
             android:id="@+id/tvProductDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="2"
-            android:text="PARACETAM ..." />
+            android:text="" />
 
         <TextView
             android:id="@+id/tvProductSud"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="SUD: 1000"
+            android:text=""
             android:textAlignment="textEnd"
             android:layout_gravity="end"
             android:visibility="invisible" />

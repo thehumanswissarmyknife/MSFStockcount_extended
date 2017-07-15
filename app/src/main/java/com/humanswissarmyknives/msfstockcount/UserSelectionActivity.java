@@ -1,23 +1,17 @@
 package com.humanswissarmyknives.msfstockcount;
 
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
-public class MainActivity extends AppCompatActivity {
+public class UserSelectionActivity extends AppCompatActivity {
 
     /*    Product currentProduct;
         Batch currentBatch;*/
@@ -42,6 +36,13 @@ public class MainActivity extends AppCompatActivity {
 
         // init the db
         db = new DatabaseHandler(this);
+/*
+
+        db.populateDB();
+        db.createProductList(1);
+
+*/
+
 
         arrayOfUsers = new ArrayList<>();
         arrayOfUsers = db.getAllUsersAsUser();
@@ -85,49 +86,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
-
-    }
-
-    void ocInitDB(View view) {
-        SQLiteDatabase dataBase = db.getWritableDatabase();
-
-        db.dropTables(dataBase);
-        db = new DatabaseHandler(this);
-
-        db.populateDB();
-        db.createProductList(1);
-
-        User myUser1 = new User(1, "Dillah", "SupplyLogassist", "Counter", "q");
-        User myUser2 = new User(2, "Dennis", "UF Trainer", "Admin", "a");
-        User myUser3 = new User(3, "Emma", "Outreach Nurse", "Counter", "z");
-
-        db.addUser(myUser1);
-        db.addUser(myUser3);
-        db.addUser(myUser2);
-
-        ReportingList myReportingList1 = new ReportingList(1, "MSR", "all medical items", "MED");
-        ReportingList myReportingList2 = new ReportingList(2, "LSR", "all log items", "LOG");
-        ReportingList myReportingList3 = new ReportingList(3, "MSR EPREP", "all medical items for emergencies", "MED");
-        ReportingList myReportingList4 = new ReportingList(4, "LSR ERU", "all log items of the emergency response unit", "LOG");
-
-
-        db.addReportingList(myReportingList1);
-        db.addReportingList(myReportingList2);
-        db.addReportingList(myReportingList3);
-        db.addReportingList(myReportingList4);
-
-        Warehouse myWarehouse1 = new Warehouse("Medical Warehouse", "MED", 1);
-        Warehouse myWarehouse2 = new Warehouse("Logstock", "LOG", 2);
-        Warehouse myWarehouse3 = new Warehouse("WatSan", "LOG", 2);
-
-        db.addWarehouse(myWarehouse1);
-        db.addWarehouse(myWarehouse2);
-        db.addWarehouse(myWarehouse3);
-
-
-        Intent iGoToUserSelection = new Intent(getApplicationContext(), UserSelectionActivity.class);
-
-        startActivity(iGoToUserSelection);
 
     }
 }

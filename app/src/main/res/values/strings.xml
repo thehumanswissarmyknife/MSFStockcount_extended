@@ -6,4 +6,14 @@
     <string name="login">Login</string>
     <string name="which_warehouse_will_you_be_counting_in">Which warehouse will you be counting in?</string>
     <string name="please_select_the_list_you_are_counting_for">Please select the list you are counting for:</string>
+    <string name="btBack">back</string>
+    <string name="btSave">save</string>
+    <string name="batch_no">Batch No:</string>
+    <string name="sud">SUD:</string>
+    <string name="please_enter_the_number_of_boxes_with_the_sud">Please enter the number of boxes with the SUD.</string>
+    <string name="units">Units:</string>
+    <string name="sud2">SUD</string>
+    <string name="equalsign">=</string>
+    <string name="x">x</string>
+    <string name="expiry_date">Expiry Date:</string>
 </resources>

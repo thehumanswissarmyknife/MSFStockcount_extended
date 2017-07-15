@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.humanswissarmyknives.msfstockcount.MainActivity">
+    tools:context="com.humanswissarmyknives.msfstockcount.UserSelectionActivity">
 
     <ScrollView
         android:layout_width="fill_parent"
@@ -18,13 +18,6 @@
             android:orientation="vertical"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="0dp">
-
-            <Button
-                android:id="@+id/btInitDB"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="ocInitDB"
-                android:text="Initialize DB" />
 
             <LinearLayout
                 android:layout_width="match_parent"

@@ -42,7 +42,7 @@ class Batch implements Comparable<Batch>{
         return batch_id;
     }
 
-    private void setBatch_id(int batch_id) {
+    void setBatch_id(int batch_id) {
         this.batch_id = batch_id;
     }
 
@@ -50,7 +50,7 @@ class Batch implements Comparable<Batch>{
         return product_code;
     }
 
-    private void setProduct_code(String product_code) {
+    void setProduct_code(String product_code) {
         this.product_code = product_code;
     }
 
@@ -58,7 +58,7 @@ class Batch implements Comparable<Batch>{
         return batch_number;
     }
 
-    private void setBatch_number(String batch_number) {
+    void setBatch_number(String batch_number) {
         this.batch_number = batch_number;
     }
 
@@ -70,7 +70,7 @@ class Batch implements Comparable<Batch>{
         return batch_sud;
     }
 
-    private void setBatch_sud(int batch_sud) {
+    void setBatch_sud(int batch_sud) {
         this.batch_sud = batch_sud;
     }
 
@@ -80,7 +80,7 @@ class Batch implements Comparable<Batch>{
         return db.getBatchQtyCountItemByBatchId(this.getBatch_id());
     }
 
-    private void setExpiryDate(String expiry_date) {
+    void setExpiryDate(String expiry_date) {
         this.expiry_date = expiry_date;
     }
 

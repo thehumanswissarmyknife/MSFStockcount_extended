@@ -18,7 +18,9 @@
         </activity>
         <activity android:name=".BatchListActivity" />
         <activity android:name=".ProductListActivity" />
-        <activity android:name=".WarehouseReportListActivity"></activity>
+        <activity android:name=".WarehouseReportListActivity" />
+        <activity android:name=".BatchCountActivity" />
+        <activity android:name=".UserSelectionActivity"></activity>
     </application>
 
 </manifest>

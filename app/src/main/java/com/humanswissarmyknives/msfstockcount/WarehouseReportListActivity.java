@@ -16,8 +16,8 @@ public class WarehouseReportListActivity extends AppCompatActivity {
 
     User currentUser;
     DatabaseHandler db;
-    Warehouse selectedWarehouse;
-    ReportingList selectedReportingList;
+    Warehouse currentWarehouse;
+    ReportingList currentReportingList;
 
     ArrayList<Warehouse> arrayOfWarehouses;
     ArrayList<ReportingList> arrayOfReportingLists;
@@ -38,8 +38,14 @@ public class WarehouseReportListActivity extends AppCompatActivity {
         // get the values passed from the previous activity
         Intent handedIntent = getIntent();
         if (handedIntent != null) {
-            int userId = handedIntent.getIntExtra("currentUserId", 0);
-            currentUser = db.getUserById(userId);
+            currentUser = db.getUserById(handedIntent.getIntExtra("currentUserId", 0));
+            if (handedIntent.hasExtra("currentWarehouseId")) {
+                currentWarehouse = db.getWarehousebyId(handedIntent.getIntExtra("currentWarehouseId", 0));
+            }
+            if (handedIntent.hasExtra("currentReportingListId")) {
+                currentReportingList = db.getReportingListById(handedIntent.getIntExtra("currentReportingListId", 0));
+            }
+
         }
 
         // get the warehouses from teh db and polulate the arraylist with them
@@ -52,6 +58,14 @@ public class WarehouseReportListActivity extends AppCompatActivity {
         final ArrayAdapter<Warehouse> adapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_user_item, arrayOfWarehouses);
         adapter.setDropDownViewResource(R.layout.spinner_user_item);
         spinner.setAdapter(adapter);
+        if (currentWarehouse != null) {
+            for (int i = 0; i < arrayOfWarehouses.size(); i++) {
+                if (currentWarehouse.getName().equals(arrayOfWarehouses.get(i).getName())) {
+                    spinner.setSelection(i);
+                }
+            }
+        }
+
 
         // listen to the changes of the spinner
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -59,9 +73,9 @@ public class WarehouseReportListActivity extends AppCompatActivity {
 
                 tvReportingList = (TextView) findViewById(R.id.tvReportingList);
 
-                selectedWarehouse = arrayOfWarehouses.get(spinner.getSelectedItemPosition());
+                currentWarehouse = arrayOfWarehouses.get(spinner.getSelectedItemPosition());
 
-                setReportingByCategory(selectedWarehouse.getCategory());
+                setReportingByCategory(currentWarehouse.getCategory());
 
             } // to close the onItemSelected
 
@@ -75,16 +89,24 @@ public class WarehouseReportListActivity extends AppCompatActivity {
     void setReportingByCategory(String category) {
         spReportingList = (Spinner) findViewById(R.id.spReportingList);
         arrayOfReportingLists = new ArrayList<>();
-        arrayOfReportingLists = db.getAllReportingListsByCategory(selectedWarehouse.getCategory());
+        arrayOfReportingLists = db.getAllReportingListsByCategory(currentWarehouse.getCategory());
 
         // set the arraylist as source for the spinner and set the XML to the spinner_user_item
         final ArrayAdapter<ReportingList> adapterRL = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_user_item, arrayOfReportingLists);
         adapterRL.setDropDownViewResource(R.layout.spinner_user_item);
         spReportingList.setAdapter(adapterRL);
 
+        if (currentReportingList != null) {
+            for (int i = 0; i < arrayOfReportingLists.size(); i++) {
+                if (currentReportingList.getName().equals(arrayOfReportingLists.get(i).getName())) {
+                    spReportingList.setSelection(i);
+                }
+            }
+        }
+
         spReportingList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedReportingList = arrayOfReportingLists.get(spReportingList.getSelectedItemPosition());
+                currentReportingList = arrayOfReportingLists.get(spReportingList.getSelectedItemPosition());
 
             } // to close the onItemSelected
 
@@ -99,10 +121,10 @@ public class WarehouseReportListActivity extends AppCompatActivity {
         // gather all info we have: user, warehouse, reportinglist and pass it to the next activity
         Intent iGoToProductList = new Intent(getApplicationContext(), ProductListActivity.class);
 
-        if (selectedReportingList != null && selectedWarehouse != null) {
+        if (currentReportingList != null && currentWarehouse != null) {
             iGoToProductList.putExtra("currentUserId", currentUser.getId());
-            iGoToProductList.putExtra("selectedWarehouseId", selectedWarehouse.getId());
-            iGoToProductList.putExtra("selectedReportingListId", selectedReportingList.getId());
+            iGoToProductList.putExtra("currentWarehouseId", currentWarehouse.getId());
+            iGoToProductList.putExtra("currentReportingListId", currentReportingList.getId());
         }
 
         startActivity(iGoToProductList);
