@@ -25,15 +25,23 @@
                 <Button
                     android:id="@+id/btBack"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
                     android:onClick="ocBackToBatchList"
                     android:text="@string/btBack" />
 
+                <ImageButton
+                    android:id="@+id/btDeleteBatch"
+                    android:layout_width="37dp"
+                    android:layout_height="40dp"
+                    android:onClick="ocDeleteBatch"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/trashcan" />
+
                 <Button
                     android:id="@+id/btSave"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
                     android:onClick="ocSave"
                     android:text="@string/btSave" />

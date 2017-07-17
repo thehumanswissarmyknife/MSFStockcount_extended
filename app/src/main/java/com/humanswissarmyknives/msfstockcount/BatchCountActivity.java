@@ -8,7 +8,9 @@ import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class BatchCountActivity extends AppCompatActivity {
@@ -59,6 +61,8 @@ public class BatchCountActivity extends AppCompatActivity {
         tvProductCode = (TextView) findViewById(R.id.tvProductCode);
         tvProductDescription = (TextView) findViewById(R.id.tvProductDescription);
         tvProductQty = (TextView) findViewById(R.id.tvProductQty);
+
+        ImageButton btDeleteBatch;
 
         // these are the ones to change
         tvSUD = (TextView) findViewById(R.id.tvSUD);
@@ -113,6 +117,12 @@ public class BatchCountActivity extends AppCompatActivity {
                 currentScrollPosition = handedIntent.getIntExtra("currentScrollPosition", 0);
             }
 
+        }
+
+        btDeleteBatch = (ImageButton) findViewById(R.id.btDeleteBatch);
+
+        if (!existingCountedItem && !existingBatch) {
+            btDeleteBatch.setAlpha(0.5f);
         }
 
         tvProductCode.setText(currentProduct.getProduct_code());
@@ -216,9 +226,41 @@ public class BatchCountActivity extends AppCompatActivity {
 
     }
 
+    void ocDeleteBatch(View view) {
+
+        if (existingBatch || existingCountedItem) {
+
+            // update the current batch with data from the EditTextFields
+
+            currentBatch.setProduct_code(currentProduct.getProduct_code());
+            currentBatch.setBatch_number(String.valueOf(etBatchNumber.getText()));
+            currentBatch.setExpiryDate(String.valueOf(etExpiryDate.getText()));
+            currentBatch.setBatch_sud(Integer.parseInt(String.valueOf(etSUD.getText())));
+
+            if (existingBatch) {
+                db.deleteBatch(currentBatch);
+            }
+
+
+            if (existingCountedItem) {
+                db.deleteCountedItem(currentCountedItem);
+            }
+
+
+            Intent iGoToBatchList = new Intent(getApplicationContext(), BatchListActivity.class);
+
+            iGoToBatchList.putExtra("currentUserId", currentUser.getId());
+            iGoToBatchList.putExtra("currentWarehouseId", currentWarehouse.getId());
+            iGoToBatchList.putExtra("currentReportingListId", currentReportingList.getId());
+            iGoToBatchList.putExtra("currentProductCode", currentProduct.getProduct_code());
+            iGoToBatchList.putExtra("currentScrollPosition", currentScrollPosition);
+
+            startActivity(iGoToBatchList);
+        }
+
+    }
+
     boolean etIsEmpty(EditText etText) {
-        if (etText.getText().toString().trim().length() > 0)
-            return false;
-        return true;
+        return etText.getText().toString().trim().length() <= 0;
     }
 }
