@@ -3,6 +3,7 @@ package com.humanswissarmyknives.msfstockcount;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -36,6 +37,7 @@ public class ProductListActivity extends AppCompatActivity {
 
         // get the values passed from the previous activity
         Intent handedIntent = getIntent();
+
         if (handedIntent != null) {
             if (handedIntent.hasExtra("currentUserId")) {
                 currentUser = db.getUserById(handedIntent.getIntExtra("currentUserId", 0));
@@ -72,15 +74,29 @@ public class ProductListActivity extends AppCompatActivity {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // check if the item is batch managed or not:
 
-                Intent iGoToBatchList = new Intent(getApplicationContext(), BatchListActivity.class);
+                if (arrayOfProducts.get(position).getIsBatchManaged().equals("FALSE")) {
+                    Intent iGoToProductCount = new Intent(getApplicationContext(), ProductCountActivity.class);
 
-                iGoToBatchList.putExtra("currentUserId", currentUser.getId());
-                iGoToBatchList.putExtra("currentWarehouseId", currentWarehouse.getId());
-                iGoToBatchList.putExtra("currentReportingListId", currentReportingList.getId());
-                iGoToBatchList.putExtra("currentProductCode", arrayOfProducts.get(position).getProduct_code());
+                    iGoToProductCount.putExtra("currentUserId", currentUser.getId());
+                    iGoToProductCount.putExtra("currentWarehouseId", currentWarehouse.getId());
+                    iGoToProductCount.putExtra("currentReportingListId", currentReportingList.getId());
+                    iGoToProductCount.putExtra("currentProductCode", arrayOfProducts.get(position).getProduct_code());
 
-                startActivity(iGoToBatchList);
+                    startActivity(iGoToProductCount);
+
+
+                } else {
+                    Intent iGoToBatchList = new Intent(getApplicationContext(), BatchListActivity.class);
+
+                    iGoToBatchList.putExtra("currentUserId", currentUser.getId());
+                    iGoToBatchList.putExtra("currentWarehouseId", currentWarehouse.getId());
+                    iGoToBatchList.putExtra("currentReportingListId", currentReportingList.getId());
+                    iGoToBatchList.putExtra("currentProductCode", arrayOfProducts.get(position).getProduct_code());
+
+                    startActivity(iGoToBatchList);
+                }
             }
         });
     }

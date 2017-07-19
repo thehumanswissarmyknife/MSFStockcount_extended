@@ -70,7 +70,7 @@ public class BatchListActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        arrayOfCounted = db.getAllCountedItemsAsBatchByProductCode(currentProduct.getProduct_code());
+        arrayOfCounted = db.getAllCountedItemsAsCountedItemByProductCode(currentProduct.getProduct_code());
 
         adapter = new CountedAdapter(this, arrayOfCounted);
 

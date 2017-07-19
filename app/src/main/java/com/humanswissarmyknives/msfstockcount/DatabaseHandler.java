@@ -44,6 +44,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_COUNTED_TOTALQTY = "total_qty";
     private static final String KEY_COUNTED_USER_ID = "user_id";
     private static final String KEY_TIMESTAMP = "timestamp";
+    private static final String KEY_COUNTED_SUD = "sud";
 
     private static final String TABLE_USERS = "User";
     private static final String KEY_USER_ID = "id";
@@ -133,6 +134,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
                 + KEY_COUNTED_BATCH_ID + " TEXT, "
                 + KEY_COUNTED_TOTALQTY + " INTEGER, "
                 + KEY_COUNTED_USER_ID + " TEXT, "
+                + KEY_COUNTED_SUD + " INTEGER, "
                 + KEY_TIMESTAMP + " DATETIME, FOREIGN KEY ("
                 + KEY_COUNTED_PRODUCT_CODE + ") REFERENCES "
                 + TABLE_PRODUCTS + " ("
@@ -172,7 +174,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
 
         String createReferenceTable = "CREATE TABLE "
                 + TABLE_PROD_LIST_REF + " ("
-                + KEY_PL_ID + " INTEGER PRIMARY KEY, "
+                + KEY_PL_ID + " INTEGER, "
                 + KEY_PL_PRODUCT_CODE + " TEXT, "
                 + KEY_PL_LIST_ID + " TEXT, FOREIGN KEY ("
                 + KEY_PL_LIST_ID + ") REFERENCES "
@@ -216,6 +218,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_COUNTED_BATCH_ID, countedItem.getBatchNumber_id());
         values.put(KEY_COUNTED_TOTALQTY, countedItem.getCountedQty());
         values.put(KEY_COUNTED_USER_ID, countedItem.getUser_id());
+        values.put(KEY_COUNTED_SUD, countedItem.getSud());
 
         db.insert(TABLE_COUNTEDITEMS, null, values);
         db.close();
@@ -315,6 +318,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_COUNTED_BATCH_ID, countedItem.getBatchNumber_id());
         values.put(KEY_COUNTED_TOTALQTY, countedItem.getCountedQty());
         values.put(KEY_COUNTED_USER_ID, countedItem.getUser_id());
+        values.put(KEY_COUNTED_SUD, countedItem.getSud());
 
         return db.update(TABLE_COUNTEDITEMS, values, KEY_COUNTED_ID + " = ?",
                 new String[]{String.valueOf(countedItem.getId())});
@@ -393,7 +397,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
                 cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),
                 cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_DESCRIPTION)),
                 cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_SUD)),
-                cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_BATCHMANAGED)));
+                cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BATCHMANAGED)));
         cursor.close();
         return product;
     }
@@ -402,7 +406,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_COUNTEDITEMS,
-                new String[]{KEY_COUNTED_ID, KEY_COUNTED_PRODUCT_CODE, KEY_COUNTED_BATCH_ID, KEY_COUNTED_TOTALQTY, KEY_COUNTED_USER_ID}, KEY_COUNTED_ID + " = ?",
+                new String[]{KEY_COUNTED_ID, KEY_COUNTED_PRODUCT_CODE, KEY_COUNTED_BATCH_ID, KEY_COUNTED_TOTALQTY, KEY_COUNTED_USER_ID, KEY_COUNTED_SUD}, KEY_COUNTED_ID + " = ?",
                 new String[]{String.valueOf(id)}, null, null, null, null);
 
         if (cursor != null) {
@@ -414,11 +418,50 @@ class DatabaseHandler extends SQLiteOpenHelper {
                 cursor.getString(cursor.getColumnIndex(KEY_COUNTED_PRODUCT_CODE)),
                 cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_BATCH_ID)),
                 cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_TOTALQTY)),
-                cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_USER_ID)));
+                cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_USER_ID)),
+                cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_SUD)));
         cursor.close();
 
         Log.i("id", String.valueOf(countedItem.getId()));
         return countedItem;
+    }
+
+    CountedItem getCountedItemByProductCode(String productCode) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_COUNTEDITEMS,
+                new String[]{KEY_COUNTED_ID, KEY_COUNTED_PRODUCT_CODE, KEY_COUNTED_BATCH_ID, KEY_COUNTED_TOTALQTY, KEY_COUNTED_USER_ID, KEY_COUNTED_SUD}, KEY_COUNTED_PRODUCT_CODE + " = ?",
+                new String[]{String.valueOf(productCode)}, null, null, null, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+
+        CountedItem countedItem = new CountedItem(
+                cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_ID)),
+                cursor.getString(cursor.getColumnIndex(KEY_COUNTED_PRODUCT_CODE)),
+                cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_BATCH_ID)),
+                cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_TOTALQTY)),
+                cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_USER_ID)),
+                cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_SUD)));
+        cursor.close();
+
+        Log.i("id", String.valueOf(countedItem.getId()));
+        return countedItem;
+    }
+
+    int getNumberOfCountedItemByProductCode(String productCode) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT COUNT(*) AS COUNT FROM " + TABLE_COUNTEDITEMS + " WHERE " + KEY_COUNTED_PRODUCT_CODE + " = '" + productCode + "'", null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+        int count = cursor.getInt(0);
+
+        cursor.close();
+
+        return count;
     }
 
     Batch getBatchById(int batchId) {
@@ -544,7 +587,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
                         cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
                         cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_DESCRIPTION)),    // Description
                         cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_SUD)),
-                        cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_BATCHMANAGED)));      // sud
+                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BATCHMANAGED)));      // sud
                 productList.add(product);
             } while (cursor.moveToNext());
         }
@@ -572,7 +615,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
                         cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
                         cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_DESCRIPTION)),    // Description
                         cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_SUD)),
-                        cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_BATCHMANAGED)));      // sud
+                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BATCHMANAGED)));      // sud
                 productList.add(product);
             } while (cursor.moveToNext());
         }
@@ -637,38 +680,78 @@ class DatabaseHandler extends SQLiteOpenHelper {
         return batchList;
     }
 
-    ArrayList<CountedItem> getAllCountedItemsAsBatchByProductCode(String productCode) {
-        ArrayList<CountedItem> batchList = new ArrayList<>();
+    ArrayList<CountedItem> getAllCountedItemsAsCountedItemByProductCode(String productCode) {
+        ArrayList<CountedItem> itemList = new ArrayList<>();
 
         String selectQuery = "SELECT C." +
                 KEY_COUNTED_BATCH_ID + ", C." +
-                KEY_COUNTED_ID + ", " +
-                KEY_PRODUCT_CODE + ", " +
+                KEY_COUNTED_ID + " , " +
+                KEY_PRODUCT_CODE + " , " +
                 KEY_COUNTED_TOTALQTY + ", " +
                 KEY_BATCH_EXPDATE + ", " +
-                KEY_COUNTED_USER_ID + " " +
-                "FROM " + TABLE_BATCHES + " AS B JOIN " + TABLE_COUNTEDITEMS + " AS C " +
-                "WHERE " + KEY_PRODUCT_CODE + " = '" + productCode + "' AND B." + KEY_BATCH_ID + " = C." + KEY_COUNTED_BATCH_ID;
-
+                KEY_COUNTED_USER_ID + ", C." +
+                KEY_COUNTED_SUD +
+                " FROM " + TABLE_BATCHES + " AS B JOIN " +
+                TABLE_COUNTEDITEMS + " AS C " +
+                "WHERE " + KEY_PRODUCT_CODE + " = '" + productCode +
+                "' AND B." + KEY_BATCH_ID + " = C." +
+                KEY_COUNTED_BATCH_ID;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
         if (cursor.moveToFirst()) {
             do {
-                CountedItem batch = new CountedItem(
+                CountedItem countedItem = new CountedItem(
                         cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_ID)),
                         cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
                         cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_BATCH_ID)),    // Description
                         cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_TOTALQTY)),
-                        cursor.getInt(cursor.getColumnIndex(KEY_USER_ID)));
-                batchList.add(batch);
+                        cursor.getInt(cursor.getColumnIndex(KEY_USER_ID)),
+                        cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_SUD)));
+                itemList.add(countedItem);
             } while (cursor.moveToNext());
         }
 
         cursor.close();
-        return batchList;
+        return itemList;
     }
 
+    ArrayList<CountedItem> getAllCountedItemsAsCountedItemsByProductCodeNoBatches(String productCode) {
+        ArrayList<CountedItem> itemList = new ArrayList<>();
+
+        String selectQuery = "SELECT " +
+                KEY_COUNTED_ID + " , " +
+                KEY_COUNTED_PRODUCT_CODE + " , " +
+                KEY_COUNTED_TOTALQTY + ", " +
+                KEY_COUNTED_USER_ID +
+                " FROM " + TABLE_COUNTEDITEMS +
+                "WHERE " + KEY_PRODUCT_CODE + " = '" + productCode +
+                "'";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+        if (cursor.moveToFirst()) {
+            do {
+                CountedItem countedItem = new CountedItem(
+                        cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_ID)),
+                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
+                        cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_BATCH_ID)),    // Description
+                        cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_TOTALQTY)),
+                        cursor.getInt(cursor.getColumnIndex(KEY_USER_ID)),
+                        cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_SUD)));
+                itemList.add(countedItem);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return itemList;
+    }
     ArrayList<User> getAllUsersAsUser() {
         ArrayList<User> userList = new ArrayList<>();
 
@@ -924,8 +1007,8 @@ class DatabaseHandler extends SQLiteOpenHelper {
         return count;
     }
 
-    void createProductList(int list_id) {
-        String[] products = {"DORAPARA5T-", "DINJCEFT2V-", "DINJCEFT1V-", "DEXTIODP1S2", "DORAFERF14T"};
+    void createProductList(int list_id, String[] products) {
+        //String[] products = {"DORAPARA5T-", "DINJCEFT2V-", "DINJCEFT1V-", "DEXTIODP1S2", "DORAFERF14T"};
 
         for (int i = 0; i < products.length; i++) {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -939,6 +1022,8 @@ class DatabaseHandler extends SQLiteOpenHelper {
             db.insert(TABLE_PROD_LIST_REF, null, values);
             db.close();
         }
+        Log.i("List", String.valueOf(list_id));
+        Log.i("Items added", String.valueOf(products.length));
     }
 
     public void populateDB() {

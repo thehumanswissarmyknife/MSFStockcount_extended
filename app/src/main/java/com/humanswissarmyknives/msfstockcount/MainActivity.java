@@ -95,7 +95,15 @@ public class MainActivity extends AppCompatActivity {
         db = new DatabaseHandler(this);
 
         db.populateDB();
-        db.createProductList(1);
+
+        // create MSR
+        String[] products = {"DORAPARA5T-", "DINJCEFT2V-", "DINJCEFT1V-", "DEXTIODP1S2", "DORAFERF14T", "YDAF0190112"};
+        db.createProductList(1, products);
+
+        // create LSR
+        String[] productsLSR = {"YDAF0190112", "TVECOILE5405I", "YTOY11176-64010", "PCOLFRESVF1G", "ASTASETSS--"};
+        db.createProductList(2, productsLSR);
+
 
         User myUser1 = new User(1, "Dillah", "SupplyLogassist", "Counter", "q");
         User myUser2 = new User(2, "Dennis", "UF Trainer", "Admin", "a");

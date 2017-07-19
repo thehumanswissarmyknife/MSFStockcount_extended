@@ -1,5 +1,7 @@
 package com.humanswissarmyknives.msfstockcount;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -111,6 +113,7 @@ public class BatchCountActivity extends AppCompatActivity {
                 etBatchNumber.setHint(String.valueOf(currentBatch.getBatch_number()));
                 etExpiryDate.setHint(String.valueOf(currentBatch.getExpiry_date()));
                 etSUD.setHint(String.valueOf(currentBatch.getBatch_sud()));
+                currentCountedItem = new CountedItem();
             }
 
             if (handedIntent.hasExtra("currentScrollPosition")) {
@@ -184,11 +187,16 @@ public class BatchCountActivity extends AppCompatActivity {
     void ocSave(View view) {
 
         // update the current batch with data from the EditTextFields
+        // check if all fields have some info - if not, raise the alarm
+        if (etBatchNumber.getText().toString().trim().length() > 0 && etQtySud.getText().toString().trim().length() > 0 && etExpiryDate.getText().toString().trim().length() > 0 && etSUD.getText().toString().trim().length() > 0) {
+            currentBatch.setBatch_number(String.valueOf(etBatchNumber.getText()));
+
 
         currentBatch.setProduct_code(currentProduct.getProduct_code());
-        currentBatch.setBatch_number(String.valueOf(etBatchNumber.getText()));
+
         currentBatch.setExpiryDate(String.valueOf(etExpiryDate.getText()));
         currentBatch.setBatch_sud(Integer.parseInt(String.valueOf(etSUD.getText())));
+            currentCountedItem.setSud(currentBatch.getBatch_sud());
 
         if (existingBatch) {
             db.updateBatch(currentBatch);
@@ -205,7 +213,8 @@ public class BatchCountActivity extends AppCompatActivity {
                     currentProduct.getProduct_code(), // product code
                     currentBatch.getBatch_id(),       // batch ID
                     Integer.parseInt(String.valueOf(etQtySud.getText())) * currentBatch.getBatch_sud(), // total quantity = QTY SUD * SUD
-                    currentUser.getId());
+                    currentUser.getId(),
+                    currentBatch.getBatch_sud());
             db.addCountedItem(currentCountedItem);
             if (currentCountedItem.getId() != db.getMaxCountItemId()) {
                 Log.i("Error", "counteditem not properly saved...");
@@ -223,6 +232,39 @@ public class BatchCountActivity extends AppCompatActivity {
         iGoToBatchList.putExtra("currentCountedItemId", currentCountedItem.getId());
 
         startActivity(iGoToBatchList);
+        } else {
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+            builder1.setMessage("Please fill all fields.");
+            builder1.setCancelable(true);
+
+            builder1.setPositiveButton(
+                    "Return to entry",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            builder1.setNegativeButton(
+                    "Delete",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                            Intent iGoToBatchList = new Intent(getApplicationContext(), BatchListActivity.class);
+
+                            iGoToBatchList.putExtra("currentUserId", currentUser.getId());
+                            iGoToBatchList.putExtra("currentWarehouseId", currentWarehouse.getId());
+                            iGoToBatchList.putExtra("currentReportingListId", currentReportingList.getId());
+                            iGoToBatchList.putExtra("currentProductCode", currentProduct.getProduct_code());
+                            iGoToBatchList.putExtra("currentScrollPosition", currentScrollPosition);
+
+                            startActivity(iGoToBatchList);
+                        }
+                    });
+
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
+        }
 
     }
 
@@ -230,32 +272,49 @@ public class BatchCountActivity extends AppCompatActivity {
 
         if (existingBatch || existingCountedItem) {
 
-            // update the current batch with data from the EditTextFields
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+            builder1.setMessage("Are you sure you want to delete this batch");
+            builder1.setCancelable(true);
 
-            currentBatch.setProduct_code(currentProduct.getProduct_code());
-            currentBatch.setBatch_number(String.valueOf(etBatchNumber.getText()));
-            currentBatch.setExpiryDate(String.valueOf(etExpiryDate.getText()));
-            currentBatch.setBatch_sud(Integer.parseInt(String.valueOf(etSUD.getText())));
+            builder1.setNegativeButton(
+                    "Return to entry",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
 
-            if (existingBatch) {
-                db.deleteBatch(currentBatch);
-            }
+            builder1.setPositiveButton(
+                    "Delete",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                            if (existingBatch) {
+                                db.deleteBatch(currentBatch);
+                            }
 
 
-            if (existingCountedItem) {
-                db.deleteCountedItem(currentCountedItem);
-            }
+                            if (existingCountedItem) {
+                                db.deleteCountedItem(currentCountedItem);
+                            }
 
 
-            Intent iGoToBatchList = new Intent(getApplicationContext(), BatchListActivity.class);
+                            Intent iGoToBatchList = new Intent(getApplicationContext(), BatchListActivity.class);
 
-            iGoToBatchList.putExtra("currentUserId", currentUser.getId());
-            iGoToBatchList.putExtra("currentWarehouseId", currentWarehouse.getId());
-            iGoToBatchList.putExtra("currentReportingListId", currentReportingList.getId());
-            iGoToBatchList.putExtra("currentProductCode", currentProduct.getProduct_code());
-            iGoToBatchList.putExtra("currentScrollPosition", currentScrollPosition);
+                            iGoToBatchList.putExtra("currentUserId", currentUser.getId());
+                            iGoToBatchList.putExtra("currentWarehouseId", currentWarehouse.getId());
+                            iGoToBatchList.putExtra("currentReportingListId", currentReportingList.getId());
+                            iGoToBatchList.putExtra("currentProductCode", currentProduct.getProduct_code());
+                            iGoToBatchList.putExtra("currentScrollPosition", currentScrollPosition);
 
-            startActivity(iGoToBatchList);
+                            startActivity(iGoToBatchList);
+                        }
+                    });
+
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
+
+
         }
 
     }

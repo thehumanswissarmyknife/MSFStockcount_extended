@@ -10,6 +10,7 @@ class CountedItem {
     private int batchNumber_id;
     private int countedQty;
     private int user_id;
+    private int sud;
 
     public CountedItem() {
 
@@ -21,14 +22,24 @@ class CountedItem {
         this.batchNumber_id = batchNumber_id;
         this.countedQty = countedQty;
         this.user_id = user_id;
+        this.sud = 0;
     }
 
-    CountedItem(int id, String product_code, int batchNumber_id, int countedQty, int user_id) {
+    CountedItem(int id, String product_code, int batchNumber_id, int countedQty, int user_id, int sud) {
         this.id = id;
         this.product_code = product_code;
         this.batchNumber_id = batchNumber_id;
         this.countedQty = countedQty;
         this.user_id = user_id;
+        this.sud = sud;
+    }
+
+    CountedItem(String product_code, int countedQty, int user_id, int sud, boolean isNotBatchManaged) {
+        this.id = 0;
+        this.product_code = product_code;
+        this.countedQty = countedQty;
+        this.user_id = user_id;
+        this.sud = sud;
     }
 
     int getId() {
@@ -70,4 +81,13 @@ class CountedItem {
     public void setUser_id(int user_id) {
         this.user_id = user_id;
     }
+
+    public int getSud() {
+        return sud;
+    }
+
+    public void setSud(int sud) {
+        this.sud = sud;
+    }
+
 }

@@ -12,7 +12,7 @@ class Product implements Comparable<Product>{
     private String product_code;
     private String product_description;
     private int product_sud;
-    private int isBatchManaged;
+    private String isBatchManaged;
 
     public Product() {
 
@@ -23,7 +23,7 @@ class Product implements Comparable<Product>{
         return this.getProduct_code().compareTo(anotherProduct.getProduct_code());
     }
 
-    Product(int id, String product_code, String product_description, int product_sud, int isBatchManaged) {
+    Product(int id, String product_code, String product_description, int product_sud, String isBatchManaged) {
         this.product_id = id;
         this.product_code = product_code;
         this.product_description = product_description;
@@ -31,7 +31,7 @@ class Product implements Comparable<Product>{
         this.isBatchManaged = isBatchManaged;
     }
 
-    Product(String product_code, String product_description, int product_sud, int isBatchManaged) {
+    Product(String product_code, String product_description, int product_sud, String isBatchManaged) {
         this.product_id = 0;
         this.product_code = product_code;
         this.product_description = product_description;
@@ -71,11 +71,11 @@ class Product implements Comparable<Product>{
         this.product_sud = product_sud;
     }
 
-    int getIsBatchManaged() {
+    String getIsBatchManaged() {
         return isBatchManaged;
     }
 
-    void setIsBatchManaged(int isBatchManaged) {
+    void setIsBatchManaged(String isBatchManaged) {
         this.isBatchManaged = isBatchManaged;
     }
 
