@@ -30,6 +30,8 @@ class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_PRODUCT_SUD = "sud";
     private static final String KEY_PRODUCT_BATCHMANAGED = "is_batch_managed";
 
+    // add old codes!!!!!!!
+
     private static final String TABLE_BATCHES = "Batch";
     private static final String KEY_BATCH_ID = "id";
     //private static final String KEY_PRODUCT_CODE = "product_code";        already defined
@@ -111,7 +113,7 @@ class DatabaseHandler extends SQLiteOpenHelper {
                 + KEY_PRODUCT_CODE + " TEXT, "
                 + KEY_PRODUCT_DESCRIPTION + " TEXT, "
                 + KEY_PRODUCT_SUD + " INTEGER, "
-                + KEY_PRODUCT_BATCHMANAGED + " )";
+                + KEY_PRODUCT_BATCHMANAGED + " TEXT)";
         db.execSQL(createDb);
 
         //table for batch numbers
