@@ -13,5 +13,8 @@ class StackItem {
     CountedItem thisCountedItem;
 
     // some method to get the info from the item - or can we use the inherent methods for batches and countedItems?
+    // do we need the distinction between  stack and stackitem
+
+    String password;
 
 }
