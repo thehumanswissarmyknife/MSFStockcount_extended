@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * Created by dennisvocke on 10.07.17.
  */
 
-class DatabaseHandler extends SQLiteOpenHelper {
+public class DatabaseHandler extends SQLiteOpenHelper {
 
 
     //region KEYWORDS

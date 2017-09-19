@@ -201,6 +201,13 @@ public class BatchCountActivity extends AppCompatActivity {
         if (existingBatch) {
             db.updateBatch(currentBatch);
         } else {
+
+            //
+            //
+            // push the batch to the server and get the correct ID
+            // then update the id in the batch and push it to the db. if the db can't be reached, push the batch creation, update + counteditem creation to the stack
+            //
+
             db.addBatch(currentBatch);
         }
 

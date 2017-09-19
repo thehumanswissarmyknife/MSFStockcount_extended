@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     EditText etPass;
     Spinner spinner;
 
+    // setuo for password verification: only three attempts to get the password right...
     int passwordCounter = 1;
     int remaining = 3;
 
@@ -39,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        DownloadTask task = new DownloadTask();
+        task.execute("http:192.168.178.42:3000/users");
 
         // init the db
         db = new DatabaseHandler(this);
