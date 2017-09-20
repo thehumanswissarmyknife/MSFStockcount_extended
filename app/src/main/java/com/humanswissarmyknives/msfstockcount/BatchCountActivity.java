@@ -202,6 +202,10 @@ public class BatchCountActivity extends AppCompatActivity {
             db.updateBatch(currentBatch);
         } else {
 
+            PostJson task = new PostJson(currentBatch);
+            task.execute();
+//            currentBatch.setForeignBatchId (task.getBatchId());   ------- doesnt work because of asynctask...
+
             //
             //
             // push the batch to the server and get the correct ID
@@ -209,6 +213,7 @@ public class BatchCountActivity extends AppCompatActivity {
             //
 
             db.addBatch(currentBatch);
+//            Log.i("foreignID", currentBatch.getForeignBatchId());
         }
 
 

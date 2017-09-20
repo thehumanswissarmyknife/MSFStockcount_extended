@@ -9,6 +9,7 @@ import android.content.Context;
 class Batch implements Comparable<Batch>{
 
     private int batch_id;
+    private String foreignBatchId;
     private String product_code;
     private String batch_number;
     private String expiry_date;
@@ -44,6 +45,14 @@ class Batch implements Comparable<Batch>{
 
     void setBatch_id(int batch_id) {
         this.batch_id = batch_id;
+    }
+
+    String getForeignBatchId() {
+        return foreignBatchId;
+    }
+
+    void setForeignBatchId(String foreignBatchId) {
+        this.foreignBatchId = foreignBatchId;
     }
 
     String getProduct_code() {
