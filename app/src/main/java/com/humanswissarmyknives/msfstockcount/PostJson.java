@@ -1,5 +1,8 @@
 package com.humanswissarmyknives.msfstockcount;
 
+import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -22,19 +25,23 @@ import java.net.URL;
 
 public class PostJson extends AsyncTask<String, Void, String> {
 
+    DatabaseHandler db;
+    Context context;
+    Stack globalStack;
+
     boolean postBatch;
     boolean postCountedItem;
     boolean postAll;
 
     int batchId;
-    String foreignBatchId;
+    String serverBatchId;
     String productCode;
     String batchNumber;
     String expiryDate;
     int batchSud;
 
     int countedItemId;
-    String foreignCountedItemId;
+    String serverCountedItemId;
     int sud;
     int userId;
     int countedQty;
@@ -76,15 +83,17 @@ public class PostJson extends AsyncTask<String, Void, String> {
         this.postBatch = true;
         this.postAll = true;
         this.postCountedItem = true;
+        Log.i("Posting", "both");
     }
 
     public String getBatchId() {
-        return foreignBatchId;
+        return serverBatchId;
     }
 
 
     @Override
     protected String doInBackground(String... urls) {
+        db = new DatabaseHandler(context);
 
         if (postBatch) {
             try {
@@ -98,6 +107,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
                 httpURLConnection.connect();
 
                 JSONObject jsonBatch = new JSONObject();
+                jsonBatch.put("batchId", batchId);
                 jsonBatch.put("productCode", productCode);
                 jsonBatch.put("batchNumber", batchNumber);
                 jsonBatch.put("expiryDate", expiryDate);
@@ -118,7 +128,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
                 while ((line = serverAnswer.readLine()) != null) {
 
                     serverBatch = new JSONObject(line);
-                    foreignBatchId = serverBatch.optJSONObject("batch").optString("_id");
+                    serverBatchId = serverBatch.optJSONObject("batch").optString("_id");
 
                     Log.i("LINE: ", line); //<--If any response from server
                     //use it as you need, if server send something back you will get it here.
@@ -126,7 +136,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
 
                 wr.close();
                 serverAnswer.close();
-                return foreignBatchId;
+//                return serverBatchId;
 
 
             } catch (MalformedURLException e) {
@@ -137,7 +147,80 @@ public class PostJson extends AsyncTask<String, Void, String> {
                 e.printStackTrace();
             }
         }
+        if (postCountedItem) {
+
+            try {
+                Log.i("Posting", "the counter");
+                URL url = new URL("http://192.168.178.42:3000/counteditems"); //Enter URL here
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+                httpURLConnection.setDoOutput(true);
+                httpURLConnection.setRequestMethod("POST"); // here you are telling that it is a POST request, which can be changed into "PUT", "GET", "DELETE" etc.
+                httpURLConnection.addRequestProperty("Accept", "application/json");
+                httpURLConnection.setRequestProperty("Content-Type", "application/json"); // here you are setting the `Content-Type` for the data you are sending which is `application/json`
+                httpURLConnection.connect();
+
+                JSONObject jsonCountedItem = new JSONObject();
+                jsonCountedItem.put("batchId", serverBatchId);
+                jsonCountedItem.put("productCode", productCode);
+                jsonCountedItem.put("totalQuantity", countedQty);
+                jsonCountedItem.put("sud", sud);
+                jsonCountedItem.put("user", userId);
+
+
+                Log.i("object", jsonCountedItem.toString());
+
+                OutputStreamWriter wr = new OutputStreamWriter(httpURLConnection.getOutputStream());
+                wr.write(jsonCountedItem.toString());
+                wr.flush();
+
+
+                //  Here you read any answer from server.
+                BufferedReader serverAnswer = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                String line;
+                JSONObject serverCountedItem;
+                while ((line = serverAnswer.readLine()) != null) {
+
+                    serverCountedItem = new JSONObject(line);
+
+                    Log.i("LINE: ", line); //<--If any response from server
+                    //use it as you need, if server send something back you will get it here.
+                }
+
+                wr.close();
+                serverAnswer.close();
+                return serverBatchId;
+
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+
+        }
 
         return null;
+    }
+
+    @Override
+    protected void onPostExecute(String s) {
+        super.onPostExecute(s);
+        MyStack myStack = new MyStack();
+        globalStack = myStack.getMyStack();
+
+        if (postBatch) {
+            Log.i("Batch", batchNumber);
+            if (globalStack.getStackHeight() > 0 && globalStack.getOldestStackItem().getBatch().getBatch_id() == batchId) {
+                globalStack.removeOldestStackItem();
+            }
+        } else if (postCountedItem) {
+            Log.i("Counted Item", String.valueOf(countedItemId));
+        } else {
+            Log.i("Batch", batchNumber + " Countedite: " + String.valueOf(countedItemId));
+        }
     }
 }

@@ -9,7 +9,7 @@ import android.content.Context;
 class Batch implements Comparable<Batch>{
 
     private int batch_id;
-    private String foreignBatchId;
+    private String serverBatchId;
     private String product_code;
     private String batch_number;
     private String expiry_date;
@@ -25,6 +25,7 @@ class Batch implements Comparable<Batch>{
         this.expiry_date = expiry_date;
         this.batch_number = batch_number;
         this.batch_sud = batch_sud;
+        this.serverBatchId = "";
     }
 
     Batch(int id, String product_code, String batch_number, String expiry_date, int batch_sud) {
@@ -33,6 +34,7 @@ class Batch implements Comparable<Batch>{
         this.expiry_date = expiry_date;
         this.batch_number = batch_number;
         this.batch_sud = batch_sud;
+        this.serverBatchId = "";
     }
 
     public int compareTo (Batch anotherBatch) {
@@ -47,12 +49,12 @@ class Batch implements Comparable<Batch>{
         this.batch_id = batch_id;
     }
 
-    String getForeignBatchId() {
-        return foreignBatchId;
+    String getServerBatchId() {
+        return serverBatchId;
     }
 
-    void setForeignBatchId(String foreignBatchId) {
-        this.foreignBatchId = foreignBatchId;
+    void setServerBatchId(String serverBatchId) {
+        this.serverBatchId = serverBatchId;
     }
 
     String getProduct_code() {

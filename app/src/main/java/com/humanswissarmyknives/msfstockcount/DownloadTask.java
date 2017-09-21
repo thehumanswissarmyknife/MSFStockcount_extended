@@ -23,6 +23,7 @@ import java.net.URL;
 
 class DownloadTask extends AsyncTask<String, Void, String> {
 
+
     // get the db connection set up through the databashandler
 
 

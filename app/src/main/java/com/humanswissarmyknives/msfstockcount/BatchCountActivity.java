@@ -24,6 +24,8 @@ public class BatchCountActivity extends AppCompatActivity {
     ReportingList currentReportingList;
     CountedItem currentCountedItem;
     Batch currentBatch;
+    StackItem currentStackItem;
+    Stack globalStack;
 
     // immutable textViews
     TextView tvProductCode;
@@ -51,6 +53,8 @@ public class BatchCountActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_batch_count);
+        globalStack = ((MyStack) getApplicationContext()).getMyStack();
+        int stackHeight = globalStack.getStackHeight();
 
         // init the db
         db = new DatabaseHandler(this);
@@ -202,8 +206,6 @@ public class BatchCountActivity extends AppCompatActivity {
             db.updateBatch(currentBatch);
         } else {
 
-            PostJson task = new PostJson(currentBatch);
-            task.execute();
 //            currentBatch.setForeignBatchId (task.getBatchId());   ------- doesnt work because of asynctask...
 
             //
@@ -227,7 +229,17 @@ public class BatchCountActivity extends AppCompatActivity {
                     Integer.parseInt(String.valueOf(etQtySud.getText())) * currentBatch.getBatch_sud(), // total quantity = QTY SUD * SUD
                     currentUser.getId(),
                     currentBatch.getBatch_sud());
+
+
             db.addCountedItem(currentCountedItem);
+
+            // what do I have to do here ?????
+            currentStackItem = new StackItem(currentBatch, currentCountedItem);
+
+            globalStack.addStackItem(currentStackItem);
+            Log.i("stackheight", String.valueOf(globalStack.getStackHeight()));
+            globalStack.pushStackItemsToServer();
+
             if (currentCountedItem.getId() != db.getMaxCountItemId()) {
                 Log.i("Error", "counteditem not properly saved...");
             }

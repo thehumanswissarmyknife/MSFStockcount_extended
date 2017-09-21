@@ -34,6 +34,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     private static final String TABLE_BATCHES = "Batch";
     private static final String KEY_BATCH_ID = "id";
+    private static final String KEY_SERVER_BATCH_ID = "server_id";
     //private static final String KEY_PRODUCT_CODE = "product_code";        already defined
     private static final String KEY_BATCH_NUMBER = "batch_number";
     private static final String KEY_BATCH_EXPDATE = "expiry_date";
@@ -41,6 +42,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     private static final String TABLE_COUNTEDITEMS = "CountedItem";
     private static final String KEY_COUNTED_ID = "id";
+    private static final String KEY_SERVER_COUNTED_ID = "server_id";
     private static final String KEY_COUNTED_PRODUCT_CODE = "product_code";
     private static final String KEY_COUNTED_BATCH_ID = "batch_id";
     private static final String KEY_COUNTED_TOTALQTY = "total_qty";
@@ -120,6 +122,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String createBatches = "CREATE TABLE "
                 + TABLE_BATCHES + " ("
                 + KEY_BATCH_ID + " INTEGER PRIMARY KEY, "
+//                + KEY_SERVER_BATCH_ID + " TEXT, "
                 + KEY_PRODUCT_CODE + " TEXT, "
                 + KEY_BATCH_NUMBER + " TEXT, "
                 + KEY_BATCH_EXPDATE + " TEXT, "
@@ -132,6 +135,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String createCountedItems = "CREATE TABLE "
                 + TABLE_COUNTEDITEMS + " ("
                 + KEY_COUNTED_ID + " INTEGER PRIMARY KEY, "
+//                + KEY_SERVER_COUNTED_ID + " TEXT, "
                 + KEY_COUNTED_PRODUCT_CODE + " TEXT, "
                 + KEY_COUNTED_BATCH_ID + " TEXT, "
                 + KEY_COUNTED_TOTALQTY + " INTEGER, "
@@ -316,6 +320,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_COUNTED_ID, countedItem.getId());
+//        values.put(KEY_SERVER_COUNTED_ID, countedItem.getServerId());
         values.put(KEY_COUNTED_PRODUCT_CODE, countedItem.getProduct_code());
         values.put(KEY_COUNTED_BATCH_ID, countedItem.getBatchNumber_id());
         values.put(KEY_COUNTED_TOTALQTY, countedItem.getCountedQty());
@@ -330,6 +335,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
+//        values.put(KEY_SERVER_BATCH_ID, batch.getServerBatchId());
         values.put(KEY_PRODUCT_CODE, batch.getProduct_code());
         values.put(KEY_BATCH_NUMBER, batch.getBatch_number());
         values.put(KEY_BATCH_EXPDATE, String.valueOf(batch.getExpiry_date()));

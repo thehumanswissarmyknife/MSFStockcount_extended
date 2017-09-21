@@ -42,14 +42,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        DownloadTask task = new DownloadTask();
-//        task.execute("http:192.168.178.42:3000/users");
+        // inti the global stack!!!
+        Stack globalStack = ((MyStack) getApplicationContext()).getMyStack();
 
         // init the db
         db = new DatabaseHandler(this);
 
         arrayOfUsers = new ArrayList<>();
         arrayOfUsers = db.getAllUsersAsUser();
+
 
         // Selection of the spinner
         spinner = (Spinner) findViewById(R.id.spUser);
