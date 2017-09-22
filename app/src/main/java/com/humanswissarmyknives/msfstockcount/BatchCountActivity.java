@@ -26,6 +26,7 @@ public class BatchCountActivity extends AppCompatActivity {
     Batch currentBatch;
     StackItem currentStackItem;
     Stack globalStack;
+    ServerConnection myServer;
 
     // immutable textViews
     TextView tvProductCode;
@@ -54,6 +55,7 @@ public class BatchCountActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_batch_count);
         globalStack = ((MyStack) getApplicationContext()).getMyStack();
+//        myServer = ((MyServer) getApplicationContext()).getMyServer();
         int stackHeight = globalStack.getStackHeight();
 
         // init the db
@@ -299,6 +301,8 @@ public class BatchCountActivity extends AppCompatActivity {
             AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
             builder1.setMessage("Are you sure you want to delete this batch");
             builder1.setCancelable(true);
+            builder1.setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Delete Batch");
 
             builder1.setNegativeButton(
                     "Return to entry",

@@ -16,7 +16,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.URL;
 
 /**
@@ -86,6 +89,25 @@ public class PostJson extends AsyncTask<String, Void, String> {
         Log.i("Posting", "both");
     }
 
+    boolean serverReachable(String url, int port) {
+        boolean exists = false;
+
+        try {
+            SocketAddress sockaddr = new InetSocketAddress(url, port);
+            // Create an unbound socket
+            Socket sock = new Socket();
+
+            // This method will block no more than timeoutMs.
+            // If the timeout occurs, SocketTimeoutException is thrown.
+            int timeoutMs = 2000;   // 2 seconds
+            sock.connect(sockaddr, timeoutMs);
+            exists = true;
+        } catch (IOException e) {
+            // Handle exception
+        }
+        return exists;
+    }
+
     public String getBatchId() {
         return serverBatchId;
     }
@@ -97,6 +119,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
 
         if (postBatch) {
             try {
+                Log.i("Start posting", "batch");
 
                 URL url = new URL("http://192.168.178.42:3000/batches"); //Enter URL here
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -114,7 +137,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
                 jsonBatch.put("sud", batchSud);
 
 
-                Log.i("object", jsonBatch.toString());
+                Log.i("Batch posted", jsonBatch.toString());
 
                 OutputStreamWriter wr = new OutputStreamWriter(httpURLConnection.getOutputStream());
                 wr.write(jsonBatch.toString());
@@ -130,7 +153,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
                     serverBatch = new JSONObject(line);
                     serverBatchId = serverBatch.optJSONObject("batch").optString("_id");
 
-                    Log.i("LINE: ", line); //<--If any response from server
+                    Log.i("Server Batch ", line); //<--If any response from server
                     //use it as you need, if server send something back you will get it here.
                 }
 
@@ -150,7 +173,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
         if (postCountedItem) {
 
             try {
-                Log.i("Posting", "the counter");
+                Log.i("Start posting", "counted item");
                 URL url = new URL("http://192.168.178.42:3000/counteditems"); //Enter URL here
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                 httpURLConnection.setDoOutput(true);
@@ -167,7 +190,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
                 jsonCountedItem.put("user", userId);
 
 
-                Log.i("object", jsonCountedItem.toString());
+                Log.i("Counted item posted", jsonCountedItem.toString());
 
                 OutputStreamWriter wr = new OutputStreamWriter(httpURLConnection.getOutputStream());
                 wr.write(jsonCountedItem.toString());
@@ -182,7 +205,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
 
                     serverCountedItem = new JSONObject(line);
 
-                    Log.i("LINE: ", line); //<--If any response from server
+                    Log.i("server counted item", line); //<--If any response from server
                     //use it as you need, if server send something back you will get it here.
                 }
 

@@ -122,7 +122,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String createBatches = "CREATE TABLE "
                 + TABLE_BATCHES + " ("
                 + KEY_BATCH_ID + " INTEGER PRIMARY KEY, "
-//                + KEY_SERVER_BATCH_ID + " TEXT, "
+                + KEY_SERVER_BATCH_ID + " TEXT, "
                 + KEY_PRODUCT_CODE + " TEXT, "
                 + KEY_BATCH_NUMBER + " TEXT, "
                 + KEY_BATCH_EXPDATE + " TEXT, "
@@ -135,7 +135,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String createCountedItems = "CREATE TABLE "
                 + TABLE_COUNTEDITEMS + " ("
                 + KEY_COUNTED_ID + " INTEGER PRIMARY KEY, "
-//                + KEY_SERVER_COUNTED_ID + " TEXT, "
+                + KEY_SERVER_COUNTED_ID + " TEXT, "
                 + KEY_COUNTED_PRODUCT_CODE + " TEXT, "
                 + KEY_COUNTED_BATCH_ID + " TEXT, "
                 + KEY_COUNTED_TOTALQTY + " INTEGER, "
@@ -220,6 +220,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_COUNTED_ID, countedItem.getId());
+        values.put(KEY_SERVER_COUNTED_ID, countedItem.getServerId());
         values.put(KEY_COUNTED_PRODUCT_CODE, countedItem.getProduct_code());
         values.put(KEY_COUNTED_BATCH_ID, countedItem.getBatchNumber_id());
         values.put(KEY_COUNTED_TOTALQTY, countedItem.getCountedQty());
@@ -320,7 +321,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_COUNTED_ID, countedItem.getId());
-//        values.put(KEY_SERVER_COUNTED_ID, countedItem.getServerId());
+        values.put(KEY_SERVER_COUNTED_ID, countedItem.getServerId());
         values.put(KEY_COUNTED_PRODUCT_CODE, countedItem.getProduct_code());
         values.put(KEY_COUNTED_BATCH_ID, countedItem.getBatchNumber_id());
         values.put(KEY_COUNTED_TOTALQTY, countedItem.getCountedQty());
@@ -335,7 +336,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-//        values.put(KEY_SERVER_BATCH_ID, batch.getServerBatchId());
+        values.put(KEY_SERVER_BATCH_ID, batch.getServerBatchId());
         values.put(KEY_PRODUCT_CODE, batch.getProduct_code());
         values.put(KEY_BATCH_NUMBER, batch.getBatch_number());
         values.put(KEY_BATCH_EXPDATE, String.valueOf(batch.getExpiry_date()));
@@ -414,7 +415,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_COUNTEDITEMS,
-                new String[]{KEY_COUNTED_ID, KEY_COUNTED_PRODUCT_CODE, KEY_COUNTED_BATCH_ID, KEY_COUNTED_TOTALQTY, KEY_COUNTED_USER_ID, KEY_COUNTED_SUD}, KEY_COUNTED_ID + " = ?",
+                new String[]{KEY_COUNTED_ID, KEY_SERVER_COUNTED_ID, KEY_COUNTED_PRODUCT_CODE, KEY_COUNTED_BATCH_ID, KEY_COUNTED_TOTALQTY, KEY_COUNTED_USER_ID, KEY_COUNTED_SUD}, KEY_COUNTED_ID + " = ?",
                 new String[]{String.valueOf(id)}, null, null, null, null);
 
         if (cursor != null) {
@@ -423,6 +424,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         CountedItem countedItem = new CountedItem(
                 cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_ID)),
+                cursor.getString(cursor.getColumnIndex(KEY_SERVER_BATCH_ID)),
                 cursor.getString(cursor.getColumnIndex(KEY_COUNTED_PRODUCT_CODE)),
                 cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_BATCH_ID)),
                 cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_TOTALQTY)),
@@ -438,7 +440,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_COUNTEDITEMS,
-                new String[]{KEY_COUNTED_ID, KEY_COUNTED_PRODUCT_CODE, KEY_COUNTED_BATCH_ID, KEY_COUNTED_TOTALQTY, KEY_COUNTED_USER_ID, KEY_COUNTED_SUD}, KEY_COUNTED_PRODUCT_CODE + " = ?",
+                new String[]{KEY_COUNTED_ID, KEY_SERVER_BATCH_ID, KEY_COUNTED_PRODUCT_CODE, KEY_COUNTED_BATCH_ID, KEY_COUNTED_TOTALQTY, KEY_COUNTED_USER_ID, KEY_COUNTED_SUD}, KEY_COUNTED_PRODUCT_CODE + " = ?",
                 new String[]{String.valueOf(productCode)}, null, null, null, null);
 
         if (cursor != null) {
@@ -447,6 +449,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         CountedItem countedItem = new CountedItem(
                 cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_ID)),
+                cursor.getString(cursor.getColumnIndex(KEY_SERVER_BATCH_ID)),
                 cursor.getString(cursor.getColumnIndex(KEY_COUNTED_PRODUCT_CODE)),
                 cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_BATCH_ID)),
                 cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_TOTALQTY)),
@@ -476,7 +479,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         Cursor cursor = db.query(TABLE_BATCHES,
-                new String[]{KEY_BATCH_ID, KEY_PRODUCT_CODE, KEY_BATCH_NUMBER, KEY_BATCH_EXPDATE, KEY_BATCH_SUD}, KEY_BATCH_ID + " =?",
+                new String[]{KEY_BATCH_ID, KEY_SERVER_BATCH_ID, KEY_PRODUCT_CODE, KEY_BATCH_NUMBER, KEY_BATCH_EXPDATE, KEY_BATCH_SUD}, KEY_BATCH_ID + " =?",
                 new String[]{String.valueOf(batchId)}, null, null, null, null);
 
         if (cursor != null) {
@@ -485,6 +488,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         Batch batch = new Batch(
                 cursor.getInt(cursor.getColumnIndex(KEY_BATCH_ID)),
+                cursor.getString(cursor.getColumnIndex(KEY_SERVER_BATCH_ID)),
                 cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),
                 cursor.getString(cursor.getColumnIndex(KEY_BATCH_NUMBER)),
                 cursor.getString(cursor.getColumnIndex(KEY_BATCH_EXPDATE)),
@@ -644,6 +648,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             do {
                 Batch batch = new Batch(
                         cursor.getInt(cursor.getColumnIndex(KEY_BATCH_ID)),
+                        cursor.getString(cursor.getColumnIndex(KEY_SERVER_BATCH_ID)),
                         cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
                         cursor.getString(cursor.getColumnIndex(KEY_BATCH_NUMBER)),    // Description
                         cursor.getString(cursor.getColumnIndex(KEY_BATCH_EXPDATE)),
@@ -676,6 +681,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             do {
                 Batch batch = new Batch(
                         cursor.getInt(cursor.getColumnIndex(KEY_BATCH_ID)),
+                        cursor.getString(cursor.getColumnIndex(KEY_SERVER_BATCH_ID)),
                         cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
                         cursor.getString(cursor.getColumnIndex(KEY_BATCH_NUMBER)),    // Description
                         cursor.getString(cursor.getColumnIndex(KEY_BATCH_EXPDATE)),
@@ -693,7 +699,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         String selectQuery = "SELECT C." +
                 KEY_COUNTED_BATCH_ID + ", C." +
-                KEY_COUNTED_ID + " , " +
+                KEY_COUNTED_ID + " , C." +
+                KEY_SERVER_COUNTED_ID + " , " +
                 KEY_PRODUCT_CODE + " , " +
                 KEY_COUNTED_TOTALQTY + ", " +
                 KEY_BATCH_EXPDATE + ", " +
@@ -714,6 +721,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             do {
                 CountedItem countedItem = new CountedItem(
                         cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_ID)),
+                        cursor.getString(cursor.getColumnIndex(KEY_SERVER_COUNTED_ID)),
                         cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
                         cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_BATCH_ID)),    // Description
                         cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_TOTALQTY)),
@@ -732,6 +740,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         String selectQuery = "SELECT " +
                 KEY_COUNTED_ID + " , " +
+                KEY_SERVER_COUNTED_ID + " , " +
                 KEY_COUNTED_PRODUCT_CODE + " , " +
                 KEY_COUNTED_TOTALQTY + ", " +
                 KEY_COUNTED_USER_ID +
@@ -748,6 +757,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             do {
                 CountedItem countedItem = new CountedItem(
                         cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_ID)),
+                        cursor.getString(cursor.getColumnIndex(KEY_SERVER_COUNTED_ID)),
                         cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
                         cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_BATCH_ID)),    // Description
                         cursor.getInt(cursor.getColumnIndex(KEY_COUNTED_TOTALQTY)),

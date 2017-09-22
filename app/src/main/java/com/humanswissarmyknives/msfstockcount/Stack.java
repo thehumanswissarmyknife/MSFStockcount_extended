@@ -38,6 +38,7 @@ public class Stack extends Application {
     int addStackItem(StackItem newStackItem) {
 
         myStack.add(newStackItem);
+        currentStackItem = myStack.get(0);
         return myStack.size();
     }
 
@@ -54,12 +55,14 @@ public class Stack extends Application {
             return 0;
         }
 
+
         // while items are int he stack try to push them to the server
 
         if (myStack.size() > 0) {
             currentStackItem = myStack.get(0);
 
             PostJson pushItem;
+
             // check if the stackItem has one or two attributes (batch or bacht & countedItem)
             if (currentStackItem.getType() == "batchonly") {
                 Log.i("trying to push", "batch only");
@@ -74,6 +77,10 @@ public class Stack extends Application {
                 pushItem.execute();
                 Log.i("Status:", pushItem.getStatus().toString());
             }
+        }
+
+        if (myStack.size() == 0) {
+            currentStackItem = null;
         }
 
         // return the number of items remaining in the stack

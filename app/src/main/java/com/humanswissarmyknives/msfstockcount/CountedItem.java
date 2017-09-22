@@ -6,7 +6,7 @@ package com.humanswissarmyknives.msfstockcount;
 
 class CountedItem {
     private int id;
-    private String server_id;
+    private String serverId;
     private String product_code;
     private int batchNumber_id;
     private int countedQty;
@@ -24,7 +24,7 @@ class CountedItem {
         this.countedQty = countedQty;
         this.user_id = user_id;
         this.sud = 0;
-        this.server_id = "";
+        this.serverId = "";
     }
 
     CountedItem(int id, String product_code, int batchNumber_id, int countedQty, int user_id, int sud) {
@@ -34,7 +34,17 @@ class CountedItem {
         this.countedQty = countedQty;
         this.user_id = user_id;
         this.sud = sud;
-        this.server_id = "";
+        this.serverId = "";
+    }
+
+    CountedItem(int id, String serverId, String product_code, int batchNumber_id, int countedQty, int user_id, int sud) {
+        this.id = id;
+        this.product_code = product_code;
+        this.batchNumber_id = batchNumber_id;
+        this.countedQty = countedQty;
+        this.user_id = user_id;
+        this.sud = sud;
+        this.serverId = serverId;
     }
 
     CountedItem(String product_code, int countedQty, int user_id, int sud, boolean isNotBatchManaged) {
@@ -54,11 +64,11 @@ class CountedItem {
     }
 
     String getServerId() {
-        return server_id;
+        return serverId;
     }
 
     public void setServerId(String serverId) {
-        this.server_id = serverId;
+        this.serverId = serverId;
     }
 
     String getProduct_code() {
