@@ -20,6 +20,13 @@ import java.util.Comparator;
 
 public class MainActivity extends AppCompatActivity {
 
+    //    static String url = "http://165.227.162.247:3000";
+    static String url = "http://192.168.178.42:3000";
+
+    static String getUrl() {
+        return url;
+    }
+
     /*    Product currentProduct;
         Batch currentBatch;*/
     User currentUser;
@@ -44,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
         // inti the global stack!!!
         Stack globalStack = ((MyStack) getApplicationContext()).getMyStack();
+        Stack pushedStack = ((MyStack) getApplicationContext()).getPushedStack();
 
         // init the db
         db = new DatabaseHandler(this);

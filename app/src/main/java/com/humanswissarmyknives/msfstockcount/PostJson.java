@@ -121,7 +121,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
             try {
                 Log.i("Start posting", "batch");
 
-                URL url = new URL("http://192.168.178.42:3000/batches"); //Enter URL here
+                URL url = new URL(MainActivity.getUrl() + "/batches"); //Enter URL here
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                 httpURLConnection.setDoOutput(true);
                 httpURLConnection.setRequestMethod("POST"); // here you are telling that it is a POST request, which can be changed into "PUT", "GET", "DELETE" etc.
@@ -174,7 +174,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
 
             try {
                 Log.i("Start posting", "counted item");
-                URL url = new URL("http://192.168.178.42:3000/counteditems"); //Enter URL here
+                URL url = new URL(MainActivity.getUrl() + "/counteditems"); //Enter URL here
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                 httpURLConnection.setDoOutput(true);
                 httpURLConnection.setRequestMethod("POST"); // here you are telling that it is a POST request, which can be changed into "PUT", "GET", "DELETE" etc.
@@ -235,15 +235,16 @@ public class PostJson extends AsyncTask<String, Void, String> {
         MyStack myStack = new MyStack();
         globalStack = myStack.getMyStack();
 
-        if (postBatch) {
+        if (postCountedItem && postBatch) {
+            Log.i("Batch", batchNumber + " Countedite: " + String.valueOf(countedItemId));
+        } else if (postBatch) {
             Log.i("Batch", batchNumber);
             if (globalStack.getStackHeight() > 0 && globalStack.getOldestStackItem().getBatch().getBatch_id() == batchId) {
                 globalStack.removeOldestStackItem();
             }
         } else if (postCountedItem) {
             Log.i("Counted Item", String.valueOf(countedItemId));
-        } else {
-            Log.i("Batch", batchNumber + " Countedite: " + String.valueOf(countedItemId));
         }
+
     }
 }

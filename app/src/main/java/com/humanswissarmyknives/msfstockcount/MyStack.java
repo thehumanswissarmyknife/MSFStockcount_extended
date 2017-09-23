@@ -12,9 +12,14 @@ class MyStack extends Application {
     private static MyStack instance;
 
     private Stack myStack = new Stack();
+    private Stack pushedStack = new Stack();
 
     public Stack getMyStack() {
         return myStack;
+    }
+
+    public Stack getPushedStack() {
+        return pushedStack;
     }
 
     public static Context getContext() {
