@@ -1,6 +1,8 @@
 package com.humanswissarmyknives.msfstockcount;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,11 +16,30 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.lang.reflect.Array;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+// import stuff for socket.io
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
+import com.github.nkzawa.emitter.Emitter;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import static android.R.attr.defaultValue;
+
+
 public class MainActivity extends AppCompatActivity {
+
+//    SharedPreferences sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), this.MODE_PRIVATE);
+
+    //    String intialSetup = getResources().getString(R.string.intialSetup);
+    boolean intialSetup = false;
+//    intialSetup = sharedPref.getBoolean(getString(R.string.intialSetup), false);
 
     //    static String url = "http://165.227.162.247:3000";
     static String url = "http://192.168.178.42:3000";
@@ -33,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
     DatabaseHandler db;
 
     ArrayList<User> arrayOfUsers;
-/*    Array array;*/
 
     EditText etPass;
     Spinner spinner;
@@ -42,12 +62,91 @@ public class MainActivity extends AppCompatActivity {
     int passwordCounter = 1;
     int remaining = 3;
 
-    //UserAdapter adapter;
+    private Socket mSocket;
+
+    {
+        try {
+            mSocket = IO.socket(url);
+            Log.i("Connection", url);
+        } catch (URISyntaxException e) {
+        }
+    }
+
+    private Emitter.Listener onInitialSetup = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            Log.i("Socket receiving", "initial setup");
+
+            db = new DatabaseHandler(getApplicationContext());
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    try {
+
+                        int qUsers = data.getInt("qUsers");
+                        JSONArray users = data.getJSONArray("users");
+
+                        // check if all users were transmitted
+                        if (qUsers == users.length()) {
+                            // enter the users into the db
+                            for (int i = 0; i < users.length(); i++) {
+                                User myUser = new User(users.getJSONObject(i));
+                                db.addUser(myUser);
+                            }
+                        }
+
+
+                        int qProducts = data.getInt("qProducts");
+                        JSONArray products = data.getJSONArray("products");
+
+                        // check if all products were transmitted
+                        if (qProducts == products.length()) {
+                            for (int i = 0; i < products.length(); i++) {
+                                Product myProduct = new Product(products.getJSONObject(i));
+                                db.addProduct(myProduct);
+                            }
+                        } else {
+                            Log.e("Initial Setup", "not all products received");
+                        }
+
+                        int qWarehouses = data.getInt("qWarehouses");
+                        JSONArray warehouses = data.getJSONArray("warehouses");
+                        int qReportinglists = data.getInt("qReportinglists");
+                        JSONArray reportinglists = data.getJSONArray("reportinglists");
+                        int qMessages = data.getInt("qMessages");
+                        JSONArray messages = data.getJSONArray("messages");
+
+                        Log.i("Users received", String.valueOf(qUsers));
+                        Log.i("Products received", String.valueOf(qProducts));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        // establish the socket
+
+        mSocket.connect();
+
+        // check the chard preferences
+        Log.i("Intial Setup", String.valueOf(intialSetup));
+//        if (!intialSetup){
+//            mSocket.emit("getInitialSetup", "");
+//        }
+
+        mSocket.on("sendInitialSetup", onInitialSetup);
 
         // inti the global stack!!!
         Stack globalStack = ((MyStack) getApplicationContext()).getMyStack();

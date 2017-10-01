@@ -66,14 +66,14 @@ public class Stack extends Application {
             // check if the stackItem has one or two attributes (batch or bacht & countedItem)
             if (currentStackItem.getType() == "batchonly") {
                 Log.i("trying to push", "batch only");
-                pushItem = new PostJson(currentStackItem.getBatch());
+                pushItem = new PostJson(currentStackItem.getBatch(), this);
                 pushItem.execute();
                 Log.i("Status:", pushItem.getStatus().toString());
 
 
             } else if (currentStackItem.getType() == "fullitem") {
                 Log.i("trying to push", "full item");
-                pushItem = new PostJson(currentStackItem.getBatch(), currentStackItem.getCountedItem());
+                pushItem = new PostJson(currentStackItem.getBatch(), currentStackItem.getCountedItem(), this);
                 pushItem.execute();
                 Log.i("Status:", pushItem.getStatus().toString());
             }

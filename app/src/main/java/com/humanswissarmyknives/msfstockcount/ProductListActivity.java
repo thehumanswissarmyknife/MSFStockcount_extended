@@ -47,6 +47,7 @@ public class ProductListActivity extends AppCompatActivity {
             }
             if (handedIntent.hasExtra("currentReportingListId")) {
                 currentReportingList = db.getReportingListById(handedIntent.getIntExtra("currentReportingListId", 0));
+                setTitle(currentReportingList.getName());
             }
 
             tvWarehouseReport = (TextView) findViewById(R.id.tvWarehouseReport);

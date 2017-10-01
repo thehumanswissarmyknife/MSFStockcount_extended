@@ -59,6 +59,7 @@ public class BatchListActivity extends AppCompatActivity {
                 }
                 if (handedIntent.hasExtra("currentProductCode")) {
                     currentProduct = db.getProductByCode(handedIntent.getStringExtra("currentProductCode"));
+                    setTitle(currentProduct.getProduct_code());
                 }
 
                 tvProductCode.setText(currentProduct.getProduct_code());

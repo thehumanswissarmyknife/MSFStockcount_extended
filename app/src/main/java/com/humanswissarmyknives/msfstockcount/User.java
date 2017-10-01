@@ -1,11 +1,16 @@
 package com.humanswissarmyknives.msfstockcount;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by dennisvocke on 24.06.17.
  */
 
 class User {
     private int id;
+    private String serverId;
     private String name;
     private String function;
     private String level;
@@ -15,12 +20,27 @@ class User {
 
     }
 
+    public User(JSONObject myObject) {
+        try {
+            this.id = 0;
+            this.serverId = myObject.getString("_id");
+            this.name = myObject.getString("userName");
+            this.function = myObject.getString("userFunction");
+            this.level = myObject.getString("userLevel");
+            this.password = myObject.getString("userPassword");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     User(String name, String function, String level, String password) {
         this.id = 0;
         this.name = name;
         this.function = function;
         this.level = level;
         this.password = password;
+        this.serverId = "";
     }
 
     User(int id, String name, String function, String level, String password) {
@@ -29,6 +49,7 @@ class User {
         this.function = function;
         this.level = level;
         this.password = password;
+        this.serverId = "";
     }
 
     int getId() {

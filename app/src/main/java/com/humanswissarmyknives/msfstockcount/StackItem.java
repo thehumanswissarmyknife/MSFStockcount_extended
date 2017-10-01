@@ -31,6 +31,14 @@ class StackItem {
         this.type = "fullitem";
     }
 
+    public void removeBatch() {
+        this.batch = null;
+    }
+
+    public void removeCountedItem() {
+        this.countedItem = null;
+    }
+
     void setTimestamp(long myTimeStamp) {
         timestamp = myTimeStamp;
     }

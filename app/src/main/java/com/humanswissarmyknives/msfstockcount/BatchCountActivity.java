@@ -15,6 +15,11 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
+
+import java.net.URISyntaxException;
+
 public class BatchCountActivity extends AppCompatActivity {
 
     Product currentProduct;
@@ -49,6 +54,16 @@ public class BatchCountActivity extends AppCompatActivity {
     boolean existingBatch = false;
     boolean existingCountedItem = false;
 
+    private Socket mSocket;
+
+    {
+        try {
+            mSocket = IO.socket(MainActivity.url);
+            Log.i("Connection", MainActivity.url);
+        } catch (URISyntaxException e) {
+        }
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +72,8 @@ public class BatchCountActivity extends AppCompatActivity {
         globalStack = ((MyStack) getApplicationContext()).getMyStack();
 //        myServer = ((MyServer) getApplicationContext()).getMyServer();
         int stackHeight = globalStack.getStackHeight();
+
+        mSocket.connect();
 
         // init the db
         db = new DatabaseHandler(this);
@@ -91,6 +108,7 @@ public class BatchCountActivity extends AppCompatActivity {
             }
             if (handedIntent.hasExtra("currentProductCode")) {
                 currentProduct = db.getProductByCode(handedIntent.getStringExtra("currentProductCode"));
+                setTitle(currentProduct.getProduct_code());
             }
             // find the layout elements and bind them to the variales.
 
@@ -198,11 +216,13 @@ public class BatchCountActivity extends AppCompatActivity {
             currentBatch.setBatch_number(String.valueOf(etBatchNumber.getText()));
 
 
-        currentBatch.setProduct_code(currentProduct.getProduct_code());
+            currentBatch.setProduct_code(currentProduct.getProduct_code());
 
         currentBatch.setExpiryDate(String.valueOf(etExpiryDate.getText()));
         currentBatch.setBatch_sud(Integer.parseInt(String.valueOf(etSUD.getText())));
             currentCountedItem.setSud(currentBatch.getBatch_sud());
+
+            mSocket.emit("newBatch", currentBatch.getJSON().toString());
 
         if (existingBatch) {
             db.updateBatch(currentBatch);

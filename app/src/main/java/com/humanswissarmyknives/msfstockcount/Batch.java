@@ -2,6 +2,9 @@ package com.humanswissarmyknives.msfstockcount;
 
 import android.content.Context;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by dennisvocke on 10.07.17.
  */
@@ -105,6 +108,23 @@ class Batch implements Comparable<Batch>{
 
     void setExpiryDate(String expiry_date) {
         this.expiry_date = expiry_date;
+    }
+
+    JSONObject getJSON() {
+
+        JSONObject jsonBatch = new JSONObject();
+        try {
+            jsonBatch.put("_id", this.batch_id);
+            jsonBatch.put("serverBatchId", this.serverBatchId);
+            jsonBatch.put("productCode", this.product_code);
+            jsonBatch.put("batchNumber", this.batch_number);
+            jsonBatch.put("expiryDate", this.expiry_date);
+            jsonBatch.put("sud", this.batch_sud);
+            return jsonBatch;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

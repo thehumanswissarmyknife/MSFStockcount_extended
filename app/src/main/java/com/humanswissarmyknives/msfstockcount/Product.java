@@ -2,6 +2,9 @@ package com.humanswissarmyknives.msfstockcount;
 
 import android.content.Context;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by dennisvocke on 24.06.17.
  * used for all products in the system
@@ -9,10 +12,12 @@ import android.content.Context;
 
 class Product implements Comparable<Product>{
     private int product_id;
+    private String serverProductId;
     private String product_code;
     private String product_description;
     private int product_sud;
     private String isBatchManaged;
+    private String oldProductCode;
 
     public Product() {
 
@@ -37,6 +42,21 @@ class Product implements Comparable<Product>{
         this.product_description = product_description;
         this.product_sud = product_sud;
         this.isBatchManaged = isBatchManaged;
+    }
+
+    Product(JSONObject myObject) {
+        try {
+            this.product_id = 0;
+            this.serverProductId = myObject.getString("_id");
+            this.product_code = myObject.getString("code");
+            this.product_description = myObject.getString("description");
+            this.product_sud = 0;
+            this.isBatchManaged = myObject.getString("batchNumberMandatory");
+            this.oldProductCode = myObject.getString("oldCode");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     int getProduct_id() {
