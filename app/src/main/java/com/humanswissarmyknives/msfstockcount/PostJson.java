@@ -124,7 +124,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
             try {
                 Log.i("Start posting", "batch");
 
-                URL url = new URL(MainActivity.getUrl() + "/batches"); //Enter URL here
+                URL url = new URL(MainActivity.url + "/batches"); //Enter URL here
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                 httpURLConnection.setDoOutput(true);
                 httpURLConnection.setRequestMethod("POST"); // here you are telling that it is a POST request, which can be changed into "PUT", "GET", "DELETE" etc.
@@ -181,7 +181,7 @@ public class PostJson extends AsyncTask<String, Void, String> {
 
             try {
                 Log.i("Start posting", "counted item");
-                URL url = new URL(MainActivity.getUrl() + "/counteditems"); //Enter URL here
+                URL url = new URL(MainActivity.url + "/counteditems"); //Enter URL here
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                 httpURLConnection.setDoOutput(true);
                 httpURLConnection.setRequestMethod("POST"); // here you are telling that it is a POST request, which can be changed into "PUT", "GET", "DELETE" etc.

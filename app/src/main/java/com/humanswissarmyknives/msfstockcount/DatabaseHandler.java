@@ -192,7 +192,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(createReferenceTable);
     }
 
-    //region adders
+    //region Products
     void addProduct(Product product) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -211,6 +211,112 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    int updateProduct(Product product) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_PRODUCT_CODE, product.getProduct_code());
+        values.put(KEY_PRODUCT_DESCRIPTION, product.getProduct_description());
+        values.put(KEY_PRODUCT_SUD, product.getProduct_sud());
+
+        return db.update(TABLE_PRODUCTS, values, KEY_PRODUCT_ID + " = ?",
+                new String[]{String.valueOf(product.getProduct_id())});
+    }
+
+    Product getProductByCode(String code) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = db.query(TABLE_PRODUCTS,
+                new String[]{KEY_PRODUCT_ID, KEY_PRODUCT_CODE, KEY_PRODUCT_DESCRIPTION, KEY_PRODUCT_SUD, KEY_PRODUCT_BATCHMANAGED}, KEY_PRODUCT_CODE + "=?",
+                new String[]{String.valueOf(code)}, null, null, null, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+
+        Product product = new Product(
+                cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_ID)),
+                cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),
+                cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_DESCRIPTION)),
+                cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_SUD)),
+                cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BATCHMANAGED)));
+        cursor.close();
+        return product;
+    }
+
+    ArrayList<Product> getAllProductsAsProduct() {
+        ArrayList<Product> productList = new ArrayList<>();
+
+        String selectQuery = "SELECT * FROM " + TABLE_PRODUCTS;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Product product = new Product(
+                        cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_ID)),
+                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
+                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_DESCRIPTION)),    // Description
+                        cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_SUD)),
+                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BATCHMANAGED)));      // sud
+                productList.add(product);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return productList;
+    }
+
+    ArrayList<Product> getProductsInAList(int list_id) {
+        ArrayList<Product> productList = new ArrayList<>();
+
+        String selectQuery = "SELECT * "
+                + "FROM (" + TABLE_PRODUCTS + " p "
+                + "INNER JOIN " + TABLE_PROD_LIST_REF + " r ON p." + KEY_PRODUCT_CODE + " = r." + KEY_PL_PRODUCT_CODE + ") "
+                + "INNER JOIN " + TABLE_REPORTINGLISTS + " l ON l." + KEY_LIST_ID + " = r." + KEY_PL_LIST_ID
+                + " WHERE l." + KEY_LIST_ID + " = '" + list_id + "'";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Product product = new Product(
+                        cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_ID)),
+                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
+                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_DESCRIPTION)),    // Description
+                        cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_SUD)),
+                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BATCHMANAGED)));      // sud
+                productList.add(product);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return productList;
+    }
+
+    int getMaxProductId() {
+        int maxId;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT MAX( " + KEY_PRODUCT_ID + " ) FROM " + TABLE_PRODUCTS, null);
+
+        cursor.moveToLast();
+        maxId = cursor.getInt(0);
+
+        cursor.close();
+        return maxId;
+    }
+
+    void deleteProduct(Product product) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_PRODUCTS, KEY_PRODUCT_ID + " = ?", new String[]{String.valueOf(product.getProduct_id())});
+        db.close();
+    }
+    //endregion
+
+    // region Counted items
     void addCountedItem(CountedItem countedItem) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -232,90 +338,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     }
 
-    void addBatch(Batch batch) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        int nextId = getMaxBatchId() + 1;
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_BATCH_ID, nextId);
-        values.put(KEY_PRODUCT_CODE, batch.getProduct_code());
-        values.put(KEY_BATCH_NUMBER, batch.getBatch_number());
-        values.put(KEY_BATCH_EXPDATE, String.valueOf(batch.getExpiry_date()));
-        values.put(KEY_BATCH_SUD, batch.getBatch_sud());
-
-        db.insert(TABLE_BATCHES, null, values);
-        db.close();
-
-    }
-
-    public void addUser(User user) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        if (user.getId() == 0) {
-            user.setId(getMaxUserId() + 1);
-        }
-
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_USER_ID, user.getId());
-        values.put(KEY_USER_NAME, user.getName());
-        values.put(KEY_USER_FUNCTION, user.getFunction());
-        values.put(KEY_USER_LEVEL, user.getLevel());
-        values.put(KEY_USER_PASSWORD, user.getPassword());
-
-        db.insert(TABLE_USERS, null, values);
-        db.close();
-    }
-
-    void addWarehouse(Warehouse warehouse) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        if (warehouse.getId() == 0) {
-            warehouse.setId(getMaxWarehouseId() + 1);
-        }
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_WAREHOUSE_ID, warehouse.getId());
-        values.put(KEY_WAREHOUSE_NAME, warehouse.getName());
-        values.put(KEY_WAREHOUSE_CATEGORY, warehouse.getCategory());
-        values.put(KEY_WAREHOUSE_LIST_ID, warehouse.getList_id());
-
-        db.insert(TABLE_WAREHOUSES, null, values);
-        db.close();
-    }
-
-    void addReportingList(ReportingList reportingList) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        if (reportingList.getId() == 0 || getReportingListById(reportingList.id) == null) {
-            reportingList.setId(getMaxReportingListId() + 1);
-        }
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_LIST_ID, reportingList.getId());
-        values.put(KEY_LIST_NAME, reportingList.getName());
-        values.put(KEY_LIST_CATEGORY, reportingList.getCategory());
-        values.put(KEY_LIST_COMMENT, reportingList.getComment());
-
-        db.insert(TABLE_REPORTINGLISTS, null, values);
-        db.close();
-    }
-    //endregion
-
-    //region updaters
-    int updateProduct(Product product) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_PRODUCT_CODE, product.getProduct_code());
-        values.put(KEY_PRODUCT_DESCRIPTION, product.getProduct_description());
-        values.put(KEY_PRODUCT_SUD, product.getProduct_sud());
-
-        return db.update(TABLE_PRODUCTS, values, KEY_PRODUCT_ID + " = ?",
-                new String[]{String.valueOf(product.getProduct_id())});
-    }
-
     int updateCountedItem(CountedItem countedItem) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -330,85 +352,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         return db.update(TABLE_COUNTEDITEMS, values, KEY_COUNTED_ID + " = ?",
                 new String[]{String.valueOf(countedItem.getId())});
-    }
-
-    int updateBatch(Batch batch) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_SERVER_BATCH_ID, batch.getServerBatchId());
-        values.put(KEY_PRODUCT_CODE, batch.getProduct_code());
-        values.put(KEY_BATCH_NUMBER, batch.getBatch_number());
-        values.put(KEY_BATCH_EXPDATE, String.valueOf(batch.getExpiry_date()));
-        values.put(KEY_BATCH_SUD, batch.getBatch_sud());
-
-        return db.update(TABLE_BATCHES, values, KEY_BATCH_ID + " =?",
-                new String[]{String.valueOf(batch.getBatch_id())});
-    }
-
-    int updateUser(User user) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_USER_NAME, user.getName());
-        values.put(KEY_USER_FUNCTION, user.getFunction());
-        values.put(KEY_USER_LEVEL, user.getLevel());
-        values.put(KEY_USER_PASSWORD, user.getPassword());
-
-        return db.update(TABLE_USERS, values, KEY_USER_ID + " =?",
-                new String[]{String.valueOf(user.getId())});
-    }
-
-    int updateWarehouse(Warehouse warehouse) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        int nextId = getMaxWarehouseId();
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_WAREHOUSE_ID, nextId);
-        values.put(KEY_WAREHOUSE_NAME, warehouse.getName());
-        values.put(KEY_WAREHOUSE_CATEGORY, warehouse.getCategory());
-        values.put(KEY_WAREHOUSE_LIST_ID, warehouse.getList_id());
-
-        return db.update(TABLE_WAREHOUSES, values, KEY_WAREHOUSE_ID + " =?",
-                new String[]{String.valueOf(warehouse.getId())});
-    }
-
-    int updateReportingList(ReportingList reportingList) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        int nextId = getMaxReportingListId();
-        ContentValues values = new ContentValues();
-        values.put(KEY_LIST_ID, nextId);
-        values.put(KEY_LIST_NAME, reportingList.getName());
-        values.put(KEY_LIST_CATEGORY, reportingList.getCategory());
-        values.put(KEY_LIST_COMMENT, reportingList.getComment());
-
-        return db.update(TABLE_REPORTINGLISTS, values, KEY_LIST_ID + " =?",
-                new String[]{String.valueOf(reportingList.getId())});
-    }
-    //endregion
-
-    //region getters
-    Product getProductByCode(String code) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        Cursor cursor = db.query(TABLE_PRODUCTS,
-                new String[]{KEY_PRODUCT_ID, KEY_PRODUCT_CODE, KEY_PRODUCT_DESCRIPTION, KEY_PRODUCT_SUD, KEY_PRODUCT_BATCHMANAGED}, KEY_PRODUCT_CODE + "=?",
-                new String[]{String.valueOf(code)}, null, null, null, null);
-
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
-
-        Product product = new Product(
-                cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_ID)),
-                cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),
-                cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_DESCRIPTION)),
-                cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_SUD)),
-                cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BATCHMANAGED)));
-        cursor.close();
-        return product;
     }
 
     CountedItem getCountedItemById(int id) {
@@ -473,225 +416,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
 
         return count;
-    }
-
-    Batch getBatchById(int batchId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        Cursor cursor = db.query(TABLE_BATCHES,
-                new String[]{KEY_BATCH_ID, KEY_SERVER_BATCH_ID, KEY_PRODUCT_CODE, KEY_BATCH_NUMBER, KEY_BATCH_EXPDATE, KEY_BATCH_SUD}, KEY_BATCH_ID + " =?",
-                new String[]{String.valueOf(batchId)}, null, null, null, null);
-
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
-
-        Batch batch = new Batch(
-                cursor.getInt(cursor.getColumnIndex(KEY_BATCH_ID)),
-                cursor.getString(cursor.getColumnIndex(KEY_SERVER_BATCH_ID)),
-                cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),
-                cursor.getString(cursor.getColumnIndex(KEY_BATCH_NUMBER)),
-                cursor.getString(cursor.getColumnIndex(KEY_BATCH_EXPDATE)),
-                cursor.getInt(cursor.getColumnIndex(KEY_BATCH_SUD)));
-        cursor.close();
-        return batch;
-    }
-
-    User getUserById(int userId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        Cursor cursor = db.query(TABLE_USERS,
-                new String[]{KEY_USER_ID, KEY_USER_NAME, KEY_USER_FUNCTION, KEY_USER_LEVEL, KEY_USER_PASSWORD}, KEY_USER_ID + " =?",
-                new String[]{String.valueOf(userId)}, null, null, null, null);
-
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
-
-        User user = new User(
-                cursor.getInt(cursor.getColumnIndex(KEY_USER_ID)),
-                cursor.getString(cursor.getColumnIndex(KEY_USER_NAME)),
-                cursor.getString(cursor.getColumnIndex(KEY_USER_FUNCTION)),
-                cursor.getString(cursor.getColumnIndex(KEY_USER_LEVEL)),
-                cursor.getString(cursor.getColumnIndex(KEY_USER_PASSWORD)));
-        cursor.close();
-        return user;
-    }
-
-    User getUserByName(String userName) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        Cursor cursor = db.query(TABLE_USERS,
-                new String[]{KEY_USER_ID, KEY_USER_NAME, KEY_USER_FUNCTION, KEY_USER_LEVEL, KEY_USER_PASSWORD}, KEY_USER_NAME + " =?",
-                new String[]{String.valueOf(userName)}, null, null, null, null);
-
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
-
-        User user = new User(
-                cursor.getInt(cursor.getColumnIndex(KEY_USER_ID)),
-                cursor.getString(cursor.getColumnIndex(KEY_USER_NAME)),
-                cursor.getString(cursor.getColumnIndex(KEY_USER_FUNCTION)),
-                cursor.getString(cursor.getColumnIndex(KEY_USER_LEVEL)),
-                cursor.getString(cursor.getColumnIndex(KEY_USER_PASSWORD)));
-        cursor.close();
-        return user;
-    }
-
-    Warehouse getWarehousebyId(int warehouseId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.query(TABLE_WAREHOUSES,
-                new String[]{KEY_WAREHOUSE_ID, KEY_WAREHOUSE_NAME, KEY_WAREHOUSE_CATEGORY, KEY_WAREHOUSE_LIST_ID}, KEY_WAREHOUSE_ID + " =?",
-                new String[]{String.valueOf(warehouseId)}, null, null, null, null);
-
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
-
-        Warehouse warehouse = new Warehouse(
-                cursor.getInt(cursor.getColumnIndex(KEY_WAREHOUSE_ID)),
-                cursor.getString(cursor.getColumnIndex(KEY_WAREHOUSE_NAME)),
-                cursor.getString(cursor.getColumnIndex(KEY_WAREHOUSE_CATEGORY)),
-                cursor.getInt(cursor.getColumnIndex(KEY_WAREHOUSE_LIST_ID)));
-        cursor.close();
-        return warehouse;
-    }
-
-    ReportingList getReportingListById(int reportingListId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.query(TABLE_REPORTINGLISTS,
-                new String[]{KEY_LIST_ID, KEY_LIST_NAME, KEY_LIST_COMMENT, KEY_LIST_CATEGORY}, KEY_LIST_ID + " =?",
-                new String[]{String.valueOf(reportingListId)}, null, null, null, null);
-
-        if (cursor.moveToFirst()) {
-            cursor.moveToFirst();
-        } else {
-            return null;
-        }
-
-        ReportingList reportingList = new ReportingList(
-                cursor.getInt(cursor.getColumnIndex(KEY_LIST_ID)),
-                cursor.getString(cursor.getColumnIndex(KEY_LIST_NAME)),
-                cursor.getString(cursor.getColumnIndex(KEY_LIST_COMMENT)),
-                cursor.getString(cursor.getColumnIndex(KEY_LIST_CATEGORY))
-        );
-        cursor.close();
-        return reportingList;
-    }
-    //endregion
-
-    //region producing the arraylists
-    ArrayList<Product> getAllProductsAsProduct() {
-        ArrayList<Product> productList = new ArrayList<>();
-
-        String selectQuery = "SELECT * FROM " + TABLE_PRODUCTS;
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Product product = new Product(
-                        cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_ID)),
-                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
-                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_DESCRIPTION)),    // Description
-                        cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_SUD)),
-                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BATCHMANAGED)));      // sud
-                productList.add(product);
-            } while (cursor.moveToNext());
-        }
-
-        cursor.close();
-        return productList;
-    }
-
-    ArrayList<Product> getProductsInAList(int list_id) {
-        ArrayList<Product> productList = new ArrayList<>();
-
-        String selectQuery = "SELECT * "
-                + "FROM (" + TABLE_PRODUCTS + " p "
-                + "INNER JOIN " + TABLE_PROD_LIST_REF + " r ON p." + KEY_PRODUCT_CODE + " = r." + KEY_PL_PRODUCT_CODE + ") "
-                + "INNER JOIN " + TABLE_REPORTINGLISTS + " l ON l." + KEY_LIST_ID + " = r." + KEY_PL_LIST_ID
-                + " WHERE l." + KEY_LIST_ID + " = '" + list_id + "'";
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Product product = new Product(
-                        cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_ID)),
-                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
-                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_DESCRIPTION)),    // Description
-                        cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_SUD)),
-                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BATCHMANAGED)));      // sud
-                productList.add(product);
-            } while (cursor.moveToNext());
-        }
-
-        cursor.close();
-        return productList;
-    }
-
-    ArrayList<Batch> getAllBatchesAsBatchByProductCode(String productCode) {
-        ArrayList<Batch> batchList = new ArrayList<>();
-
-        String selectQuery = "SELECT * FROM " + TABLE_BATCHES + " WHERE " + KEY_PRODUCT_CODE + " = '" + productCode + "'";
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Batch batch = new Batch(
-                        cursor.getInt(cursor.getColumnIndex(KEY_BATCH_ID)),
-                        cursor.getString(cursor.getColumnIndex(KEY_SERVER_BATCH_ID)),
-                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
-                        cursor.getString(cursor.getColumnIndex(KEY_BATCH_NUMBER)),    // Description
-                        cursor.getString(cursor.getColumnIndex(KEY_BATCH_EXPDATE)),
-                        cursor.getInt(cursor.getColumnIndex(KEY_BATCH_SUD)));      // sud
-                batchList.add(batch);
-            } while (cursor.moveToNext());
-        }
-
-        cursor.close();
-        return batchList;
-    }
-
-    ArrayList<Batch> getAllCountedBatchesAsBatchByProductCode(String productCode) {
-        ArrayList<Batch> batchList = new ArrayList<>();
-
-        String selectQuery = "SELECT B." +
-                KEY_BATCH_ID + ", " +
-                //KEY_COUNTED_ID + ", " +
-                KEY_PRODUCT_CODE + ", " +
-                KEY_BATCH_NUMBER + ", " +
-                KEY_BATCH_EXPDATE + ", " +
-                KEY_BATCH_SUD + " " +
-                "FROM " + TABLE_BATCHES + " AS B JOIN " + TABLE_COUNTEDITEMS + " AS C " +
-                "WHERE " + KEY_PRODUCT_CODE + " = '" + productCode + "' AND B." + KEY_BATCH_ID + " = C." + KEY_COUNTED_BATCH_ID;
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Batch batch = new Batch(
-                        cursor.getInt(cursor.getColumnIndex(KEY_BATCH_ID)),
-                        cursor.getString(cursor.getColumnIndex(KEY_SERVER_BATCH_ID)),
-                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
-                        cursor.getString(cursor.getColumnIndex(KEY_BATCH_NUMBER)),    // Description
-                        cursor.getString(cursor.getColumnIndex(KEY_BATCH_EXPDATE)),
-                        cursor.getInt(cursor.getColumnIndex(KEY_BATCH_SUD)));      // sud
-                batchList.add(batch);
-            } while (cursor.moveToNext());
-        }
-
-        cursor.close();
-        return batchList;
     }
 
     ArrayList<CountedItem> getAllCountedItemsAsCountedItemByProductCode(String productCode) {
@@ -770,6 +494,239 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
         return itemList;
     }
+
+    void deleteCountedItem(CountedItem countedItem) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_COUNTEDITEMS, KEY_COUNTED_ID + " =?", new String[]{String.valueOf(countedItem.getId())});
+        db.close();
+    }
+
+    int getMaxCountItemId() {
+        int maxId;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT MAX( " + KEY_COUNTED_ID + " ) FROM " + TABLE_COUNTEDITEMS, null);
+
+        cursor.moveToLast();
+        maxId = cursor.getInt(0);
+
+        cursor.close();
+        return maxId;
+    }
+
+    // endregion
+
+// region Batches
+
+    void addBatch(Batch batch) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        int nextId = getMaxBatchId() + 1;
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_BATCH_ID, nextId);
+        values.put(KEY_PRODUCT_CODE, batch.getProduct_code());
+        values.put(KEY_BATCH_NUMBER, batch.getBatch_number());
+        values.put(KEY_BATCH_EXPDATE, String.valueOf(batch.getExpiry_date()));
+        values.put(KEY_BATCH_SUD, batch.getBatch_sud());
+
+        db.insert(TABLE_BATCHES, null, values);
+        db.close();
+
+    }
+
+    int updateBatch(Batch batch) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_SERVER_BATCH_ID, batch.getServerBatchId());
+        values.put(KEY_PRODUCT_CODE, batch.getProduct_code());
+        values.put(KEY_BATCH_NUMBER, batch.getBatch_number());
+        values.put(KEY_BATCH_EXPDATE, String.valueOf(batch.getExpiry_date()));
+        values.put(KEY_BATCH_SUD, batch.getBatch_sud());
+
+        return db.update(TABLE_BATCHES, values, KEY_BATCH_ID + " =?",
+                new String[]{String.valueOf(batch.getBatch_id())});
+    }
+
+    Batch getBatchById(int batchId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = db.query(TABLE_BATCHES,
+                new String[]{KEY_BATCH_ID, KEY_SERVER_BATCH_ID, KEY_PRODUCT_CODE, KEY_BATCH_NUMBER, KEY_BATCH_EXPDATE, KEY_BATCH_SUD}, KEY_BATCH_ID + " =?",
+                new String[]{String.valueOf(batchId)}, null, null, null, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+
+        Batch batch = new Batch(
+                cursor.getInt(cursor.getColumnIndex(KEY_BATCH_ID)),
+                cursor.getString(cursor.getColumnIndex(KEY_SERVER_BATCH_ID)),
+                cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),
+                cursor.getString(cursor.getColumnIndex(KEY_BATCH_NUMBER)),
+                cursor.getString(cursor.getColumnIndex(KEY_BATCH_EXPDATE)),
+                cursor.getInt(cursor.getColumnIndex(KEY_BATCH_SUD)));
+        cursor.close();
+        return batch;
+    }
+
+    ArrayList<Batch> getAllBatchesAsBatchByProductCode(String productCode) {
+        ArrayList<Batch> batchList = new ArrayList<>();
+
+        String selectQuery = "SELECT * FROM " + TABLE_BATCHES + " WHERE " + KEY_PRODUCT_CODE + " = '" + productCode + "'";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Batch batch = new Batch(
+                        cursor.getInt(cursor.getColumnIndex(KEY_BATCH_ID)),
+                        cursor.getString(cursor.getColumnIndex(KEY_SERVER_BATCH_ID)),
+                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
+                        cursor.getString(cursor.getColumnIndex(KEY_BATCH_NUMBER)),    // Description
+                        cursor.getString(cursor.getColumnIndex(KEY_BATCH_EXPDATE)),
+                        cursor.getInt(cursor.getColumnIndex(KEY_BATCH_SUD)));      // sud
+                batchList.add(batch);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return batchList;
+    }
+
+    ArrayList<Batch> getAllCountedBatchesAsBatchByProductCode(String productCode) {
+        ArrayList<Batch> batchList = new ArrayList<>();
+
+        String selectQuery = "SELECT B." +
+                KEY_BATCH_ID + ", " +
+                //KEY_COUNTED_ID + ", " +
+                KEY_PRODUCT_CODE + ", " +
+                KEY_BATCH_NUMBER + ", " +
+                KEY_BATCH_EXPDATE + ", " +
+                KEY_BATCH_SUD + " " +
+                "FROM " + TABLE_BATCHES + " AS B JOIN " + TABLE_COUNTEDITEMS + " AS C " +
+                "WHERE " + KEY_PRODUCT_CODE + " = '" + productCode + "' AND B." + KEY_BATCH_ID + " = C." + KEY_COUNTED_BATCH_ID;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Batch batch = new Batch(
+                        cursor.getInt(cursor.getColumnIndex(KEY_BATCH_ID)),
+                        cursor.getString(cursor.getColumnIndex(KEY_SERVER_BATCH_ID)),
+                        cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_CODE)),    // code
+                        cursor.getString(cursor.getColumnIndex(KEY_BATCH_NUMBER)),    // Description
+                        cursor.getString(cursor.getColumnIndex(KEY_BATCH_EXPDATE)),
+                        cursor.getInt(cursor.getColumnIndex(KEY_BATCH_SUD)));      // sud
+                batchList.add(batch);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return batchList;
+    }
+
+    void deleteBatch(Batch batch) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_BATCHES, KEY_BATCH_ID + " =?", new String[]{String.valueOf(batch.getBatch_id())});
+        db.close();
+    }
+
+    int getMaxBatchId() {
+        int maxId;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT MAX( " + KEY_BATCH_ID + " ) FROM " + TABLE_BATCHES, null);
+
+        cursor.moveToLast();
+        maxId = cursor.getInt(0);
+
+        cursor.close();
+        return maxId;
+    }
+
+
+// endregion
+
+// region User
+
+    public void addUser(User user) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        if (user.getId() == 0) {
+            user.setId(getMaxUserId() + 1);
+        }
+
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_USER_ID, user.getId());
+        values.put(KEY_USER_NAME, user.getName());
+        values.put(KEY_USER_FUNCTION, user.getFunction());
+        values.put(KEY_USER_LEVEL, user.getLevel());
+        values.put(KEY_USER_PASSWORD, user.getPassword());
+
+        db.insert(TABLE_USERS, null, values);
+        db.close();
+    }
+
+    int updateUser(User user) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_USER_NAME, user.getName());
+        values.put(KEY_USER_FUNCTION, user.getFunction());
+        values.put(KEY_USER_LEVEL, user.getLevel());
+        values.put(KEY_USER_PASSWORD, user.getPassword());
+
+        return db.update(TABLE_USERS, values, KEY_USER_ID + " =?",
+                new String[]{String.valueOf(user.getId())});
+    }
+
+    User getUserById(int userId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = db.query(TABLE_USERS,
+                new String[]{KEY_USER_ID, KEY_USER_NAME, KEY_USER_FUNCTION, KEY_USER_LEVEL, KEY_USER_PASSWORD}, KEY_USER_ID + " =?",
+                new String[]{String.valueOf(userId)}, null, null, null, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+
+        User user = new User(
+                cursor.getInt(cursor.getColumnIndex(KEY_USER_ID)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_NAME)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_FUNCTION)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_LEVEL)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_PASSWORD)));
+        cursor.close();
+        return user;
+    }
+
+    User getUserByName(String userName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = db.query(TABLE_USERS,
+                new String[]{KEY_USER_ID, KEY_USER_NAME, KEY_USER_FUNCTION, KEY_USER_LEVEL, KEY_USER_PASSWORD}, KEY_USER_NAME + " =?",
+                new String[]{String.valueOf(userName)}, null, null, null, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+
+        User user = new User(
+                cursor.getInt(cursor.getColumnIndex(KEY_USER_ID)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_NAME)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_FUNCTION)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_LEVEL)),
+                cursor.getString(cursor.getColumnIndex(KEY_USER_PASSWORD)));
+        cursor.close();
+        return user;
+    }
+
     ArrayList<User> getAllUsersAsUser() {
         ArrayList<User> userList = new ArrayList<>();
 
@@ -794,6 +751,81 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return userList;
     }
 
+    void deleteUser(User user) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_USERS, KEY_USER_ID + " =?", new String[]{String.valueOf(user.getId())});
+        db.close();
+    }
+
+    private int getMaxUserId() {
+        int maxId;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT MAX( " + KEY_USER_ID + " ) FROM " + TABLE_USERS, null);
+
+        cursor.moveToLast();
+        maxId = cursor.getInt(0);
+
+        cursor.close();
+        return maxId;
+    }
+
+// endregion
+
+// region Warehouses
+
+    void addWarehouse(Warehouse warehouse) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        if (warehouse.getId() == 0) {
+            warehouse.setId(getMaxWarehouseId() + 1);
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_WAREHOUSE_ID, warehouse.getId());
+        values.put(KEY_WAREHOUSE_NAME, warehouse.getName());
+        values.put(KEY_WAREHOUSE_CATEGORY, warehouse.getCategory());
+        values.put(KEY_WAREHOUSE_LIST_ID, warehouse.getList_id());
+
+        db.insert(TABLE_WAREHOUSES, null, values);
+        db.close();
+    }
+
+    int updateWarehouse(Warehouse warehouse) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        int nextId = getMaxWarehouseId();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_WAREHOUSE_ID, nextId);
+        values.put(KEY_WAREHOUSE_NAME, warehouse.getName());
+        values.put(KEY_WAREHOUSE_CATEGORY, warehouse.getCategory());
+        values.put(KEY_WAREHOUSE_LIST_ID, warehouse.getList_id());
+
+        return db.update(TABLE_WAREHOUSES, values, KEY_WAREHOUSE_ID + " =?",
+                new String[]{String.valueOf(warehouse.getId())});
+    }
+
+    Warehouse getWarehousebyId(int warehouseId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_WAREHOUSES,
+                new String[]{KEY_WAREHOUSE_ID, KEY_WAREHOUSE_NAME, KEY_WAREHOUSE_CATEGORY, KEY_WAREHOUSE_LIST_ID}, KEY_WAREHOUSE_ID + " =?",
+                new String[]{String.valueOf(warehouseId)}, null, null, null, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+
+        Warehouse warehouse = new Warehouse(
+                cursor.getInt(cursor.getColumnIndex(KEY_WAREHOUSE_ID)),
+                cursor.getString(cursor.getColumnIndex(KEY_WAREHOUSE_NAME)),
+                cursor.getString(cursor.getColumnIndex(KEY_WAREHOUSE_CATEGORY)),
+                cursor.getInt(cursor.getColumnIndex(KEY_WAREHOUSE_LIST_ID)));
+        cursor.close();
+        return warehouse;
+    }
+
     ArrayList<Warehouse> getAllWarehousesAsWarehouse() {
         ArrayList<Warehouse> warehouseList = new ArrayList<>();
 
@@ -815,6 +847,77 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         cursor.close();
         return warehouseList;
+    }
+
+    private int getMaxWarehouseId() {
+        int maxId;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT MAX( " + KEY_WAREHOUSE_ID + " ) FROM " + TABLE_WAREHOUSES, null);
+
+        cursor.moveToLast();
+        maxId = cursor.getInt(0);
+
+        cursor.close();
+        return maxId;
+    }
+
+    // endregion
+
+// region Reportinglissts
+
+    void addReportingList(ReportingList reportingList) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        if (reportingList.getId() == 0 || getReportingListById(reportingList.id) == null) {
+            reportingList.setId(getMaxReportingListId() + 1);
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_LIST_ID, reportingList.getId());
+        values.put(KEY_LIST_NAME, reportingList.getName());
+        values.put(KEY_LIST_CATEGORY, reportingList.getCategory());
+        values.put(KEY_LIST_COMMENT, reportingList.getComment());
+
+        db.insert(TABLE_REPORTINGLISTS, null, values);
+        db.close();
+    }
+
+    int updateReportingList(ReportingList reportingList) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        int nextId = getMaxReportingListId();
+        ContentValues values = new ContentValues();
+        values.put(KEY_LIST_ID, nextId);
+        values.put(KEY_LIST_NAME, reportingList.getName());
+        values.put(KEY_LIST_CATEGORY, reportingList.getCategory());
+        values.put(KEY_LIST_COMMENT, reportingList.getComment());
+
+        return db.update(TABLE_REPORTINGLISTS, values, KEY_LIST_ID + " =?",
+                new String[]{String.valueOf(reportingList.getId())});
+    }
+
+    ReportingList getReportingListById(int reportingListId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_REPORTINGLISTS,
+                new String[]{KEY_LIST_ID, KEY_LIST_NAME, KEY_LIST_COMMENT, KEY_LIST_CATEGORY}, KEY_LIST_ID + " =?",
+                new String[]{String.valueOf(reportingListId)}, null, null, null, null);
+
+        if (cursor.moveToFirst()) {
+            cursor.moveToFirst();
+        } else {
+            return null;
+        }
+
+        ReportingList reportingList = new ReportingList(
+                cursor.getInt(cursor.getColumnIndex(KEY_LIST_ID)),
+                cursor.getString(cursor.getColumnIndex(KEY_LIST_NAME)),
+                cursor.getString(cursor.getColumnIndex(KEY_LIST_COMMENT)),
+                cursor.getString(cursor.getColumnIndex(KEY_LIST_CATEGORY))
+        );
+        cursor.close();
+        return reportingList;
     }
 
     ArrayList<ReportingList> getAllReportingListsAsReportingLists() {
@@ -862,101 +965,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
         return reportingListList;
     }
-    //endregion
 
-    //region deleters
-    void deleteProduct(Product product) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_PRODUCTS, KEY_PRODUCT_ID + " = ?", new String[]{String.valueOf(product.getProduct_id())});
-        db.close();
-    }
-
-    void deleteBatch(Batch batch) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_BATCHES, KEY_BATCH_ID + " =?", new String[]{String.valueOf(batch.getBatch_id())});
-        db.close();
-    }
-
-    void deleteCountedItem(CountedItem countedItem) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_COUNTEDITEMS, KEY_COUNTED_ID + " =?", new String[]{String.valueOf(countedItem.getId())});
-        db.close();
-    }
-
-    void deleteUser(User user) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_USERS, KEY_USER_ID + " =?", new String[]{String.valueOf(user.getId())});
-        db.close();
-    }
-    //endregion
-
-    //region get the max id to propose the next ID
-    int getMaxProductId() {
-        int maxId;
-
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT MAX( " + KEY_PRODUCT_ID + " ) FROM " + TABLE_PRODUCTS, null);
-
-        cursor.moveToLast();
-        maxId = cursor.getInt(0);
-
-        cursor.close();
-        return maxId;
-    }
-
-    int getMaxCountItemId() {
-        int maxId;
-
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT MAX( " + KEY_COUNTED_ID + " ) FROM " + TABLE_COUNTEDITEMS, null);
-
-        cursor.moveToLast();
-        maxId = cursor.getInt(0);
-
-        cursor.close();
-        return maxId;
-    }
-
-    int getMaxBatchId() {
-        int maxId;
-
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT MAX( " + KEY_BATCH_ID + " ) FROM " + TABLE_BATCHES, null);
-
-        cursor.moveToLast();
-        maxId = cursor.getInt(0);
-
-        cursor.close();
-        return maxId;
-    }
-
-    private int getMaxUserId() {
-        int maxId;
-
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT MAX( " + KEY_USER_ID + " ) FROM " + TABLE_USERS, null);
-
-        cursor.moveToLast();
-        maxId = cursor.getInt(0);
-
-        cursor.close();
-        return maxId;
-    }
-
-    private int getMaxWarehouseId() {
-        int maxId;
-
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT MAX( " + KEY_WAREHOUSE_ID + " ) FROM " + TABLE_WAREHOUSES, null);
-
-        cursor.moveToLast();
-        maxId = cursor.getInt(0);
-
-        cursor.close();
-        return maxId;
-    }
-
-    private int getMaxReportingListId() {
+    int getMaxReportingListId() {
         int maxId;
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -968,7 +978,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
         return maxId;
     }
-    //endregion
+
+    // endregion
+
 
     //region special stuff
     int getTotalQtyCountItemByProductCode(String product_code) {
@@ -1042,6 +1054,25 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         Log.i("List", String.valueOf(list_id));
         Log.i("Items added", String.valueOf(products.length));
+    }
+
+    void createProductList(int list_id, ArrayList products) {
+        //String[] products = {"DORAPARA5T-", "DINJCEFT2V-", "DINJCEFT1V-", "DEXTIODP1S2", "DORAFERF14T"};
+
+        for (int i = 0; i < products.size(); i++) {
+            SQLiteDatabase db = this.getWritableDatabase();
+
+
+            ContentValues values = new ContentValues();
+            values.put(KEY_PL_ID, i);
+            values.put(KEY_PL_LIST_ID, list_id);
+            values.put(KEY_PL_PRODUCT_CODE, products.get(i).toString());
+
+            db.insert(TABLE_PROD_LIST_REF, null, values);
+            db.close();
+        }
+        Log.i("List", String.valueOf(list_id));
+        Log.i("Items added", String.valueOf(products.size()));
     }
 
     public void populateDB() {

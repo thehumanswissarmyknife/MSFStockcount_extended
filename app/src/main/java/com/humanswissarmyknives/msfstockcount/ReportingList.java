@@ -1,5 +1,8 @@
 package com.humanswissarmyknives.msfstockcount;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by dennisvocke on 13.07.17.
  * <p>
@@ -28,6 +31,17 @@ class ReportingList {
         this.name = name;
         this.comment = comment;
         this.category = category;
+    }
+
+    public ReportingList(JSONObject myObject) {
+        this.id = 0;
+        try {
+            this.name = myObject.getString("name");
+            this.comment = myObject.getString("comment");
+            this.category = myObject.getString("category");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setId(int id) {

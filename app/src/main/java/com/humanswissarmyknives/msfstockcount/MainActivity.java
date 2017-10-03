@@ -35,21 +35,23 @@ import static android.R.attr.defaultValue;
 
 public class MainActivity extends AppCompatActivity {
 
-//    SharedPreferences sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), this.MODE_PRIVATE);
+    // find out if the inital setup has been completed
+    SharedPreferences sharedPref;
 
-    //    String intialSetup = getResources().getString(R.string.intialSetup);
-    boolean intialSetup = false;
-//    intialSetup = sharedPref.getBoolean(getString(R.string.intialSetup), false);
+    SharedPreferences.Editor editor;
+
+    SingletonClass mySingleton;
+    Socket mSocket;
+    Stack globalStack;
+    Stack pushedStack;
+    boolean intialSetup;
 
     //    static String url = "http://165.227.162.247:3000";
     static String url = "http://192.168.178.42:3000";
 
-    static String getUrl() {
-        return url;
-    }
+    // get the signleton for stack access and socket!
 
-    /*    Product currentProduct;
-        Batch currentBatch;*/
+
     User currentUser;
     DatabaseHandler db;
 
@@ -62,101 +64,46 @@ public class MainActivity extends AppCompatActivity {
     int passwordCounter = 1;
     int remaining = 3;
 
-    private Socket mSocket;
-
-    {
-        try {
-            mSocket = IO.socket(url);
-            Log.i("Connection", url);
-        } catch (URISyntaxException e) {
-        }
-    }
-
-    private Emitter.Listener onInitialSetup = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            Log.i("Socket receiving", "initial setup");
-
-            db = new DatabaseHandler(getApplicationContext());
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    try {
-
-                        int qUsers = data.getInt("qUsers");
-                        JSONArray users = data.getJSONArray("users");
-
-                        // check if all users were transmitted
-                        if (qUsers == users.length()) {
-                            // enter the users into the db
-                            for (int i = 0; i < users.length(); i++) {
-                                User myUser = new User(users.getJSONObject(i));
-                                db.addUser(myUser);
-                            }
-                        }
-
-
-                        int qProducts = data.getInt("qProducts");
-                        JSONArray products = data.getJSONArray("products");
-
-                        // check if all products were transmitted
-                        if (qProducts == products.length()) {
-                            for (int i = 0; i < products.length(); i++) {
-                                Product myProduct = new Product(products.getJSONObject(i));
-                                db.addProduct(myProduct);
-                            }
-                        } else {
-                            Log.e("Initial Setup", "not all products received");
-                        }
-
-                        int qWarehouses = data.getInt("qWarehouses");
-                        JSONArray warehouses = data.getJSONArray("warehouses");
-                        int qReportinglists = data.getInt("qReportinglists");
-                        JSONArray reportinglists = data.getJSONArray("reportinglists");
-                        int qMessages = data.getInt("qMessages");
-                        JSONArray messages = data.getJSONArray("messages");
-
-                        Log.i("Users received", String.valueOf(qUsers));
-                        Log.i("Products received", String.valueOf(qProducts));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-        }
-    };
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+
+        intialSetup = sharedPref.getBoolean(getString(R.string.intialSetup), false);
+
+        mySingleton = SingletonClass.getInstance();
+
+        mSocket = SingletonClass.getSocket();
+        globalStack = SingletonClass.getGlobalStack();
+        pushedStack = SingletonClass.getPushedStack();
+
+        // check the shared preferences, if the initial setup has been done!
+        Log.i("Intial Setup", String.valueOf(intialSetup));
+        if (!intialSetup) {
+            mSocket.emit("getInitialSetup", "");
+        }
+
+        mSocket.on("sendInitialSetup", onInitialSetup);
+
+        db = new DatabaseHandler(this);
+
+        arrayOfUsers = new ArrayList<>();
+        arrayOfUsers = db.getAllUsersAsUser();
 
 
         // establish the socket
 
         mSocket.connect();
 
-        // check the chard preferences
-        Log.i("Intial Setup", String.valueOf(intialSetup));
-//        if (!intialSetup){
-//            mSocket.emit("getInitialSetup", "");
-//        }
 
-        mSocket.on("sendInitialSetup", onInitialSetup);
-
-        // inti the global stack!!!
-        Stack globalStack = ((MyStack) getApplicationContext()).getMyStack();
-        Stack pushedStack = ((MyStack) getApplicationContext()).getPushedStack();
+//        // inti the global stack!!!
+//        Stack globalStack = ((MyStack) getApplicationContext()).getMyStack();
+//        Stack pushedStack = ((MyStack) getApplicationContext()).getPushedStack();
 
         // init the db
-        db = new DatabaseHandler(this);
 
-        arrayOfUsers = new ArrayList<>();
-        arrayOfUsers = db.getAllUsersAsUser();
 
 
         // Selection of the spinner
@@ -251,4 +198,106 @@ public class MainActivity extends AppCompatActivity {
         startActivity(iGoToUserSelection);
 
     }
+
+    private Emitter.Listener onInitialSetup = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            Log.i("Socket receiving", "initial setup");
+
+            db = new DatabaseHandler(getApplicationContext());
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    try {
+
+                        int qUsers = data.getInt("qUsers");
+                        JSONArray users = data.getJSONArray("users");
+
+                        // check if all users were transmitted
+                        if (qUsers == users.length()) {
+                            // enter the users into the db
+                            for (int i = 0; i < users.length(); i++) {
+                                User myUser = new User(users.getJSONObject(i));
+                                db.addUser(myUser);
+                            }
+                        }
+
+
+                        int qProducts = data.getInt("qProducts");
+                        JSONArray products = data.getJSONArray("products");
+
+                        // check if all products were transmitted
+                        if (qProducts == products.length()) {
+                            for (int i = 0; i < products.length(); i++) {
+                                Product myProduct = new Product(products.getJSONObject(i));
+                                db.addProduct(myProduct);
+                            }
+                        } else {
+                            Log.e("Initial Setup", "not all products received");
+                        }
+
+                        int qReportinglists = data.getInt("qReportinglists");
+                        JSONArray reportinglists = data.getJSONArray("reportinglists");
+
+                        if (qReportinglists == reportinglists.length()) {
+                            for (int i = 0; i < reportinglists.length(); i++) {
+
+                                JSONObject rList = reportinglists.getJSONObject(i);
+                                JSONArray tArray = rList.getJSONArray("products");
+                                ArrayList tempArrayList = new ArrayList<String>();
+
+                                // create the reportinglist object
+                                ReportingList temp = new ReportingList(rList);
+
+                                // writing the date to the db and get the ID back
+                                db.addReportingList(temp);
+                                int tempId = db.getMaxReportingListId();
+
+                                for (int j = 0; j < tArray.length(); j++) {
+                                    tempArrayList.add(tArray.get(j));
+                                    Log.i("prouct added", tempArrayList.get(j).toString());
+                                }
+                                db.createProductList(tempId, tempArrayList);
+
+                            }
+                        }
+
+                        int qWarehouses = data.getInt("qWarehouses");
+                        JSONArray warehouses = data.getJSONArray("warehouses");
+
+                        if (qWarehouses == warehouses.length()) {
+                            for (int i = 0; i < warehouses.length(); i++) {
+                                JSONObject temp = warehouses.getJSONObject(i);
+                                JSONArray tempIds = temp.getJSONArray("reportingListIds");
+//                                Warehouse tempWarehouse = new Warehouse(warehouses.getJSONObject(i));
+                                for (int j = 0; j < tempIds.length(); j++) {
+                                    Warehouse tempWarehouse = new Warehouse(temp.getString("name"), temp.getString("category"), tempIds.getInt(j));
+                                    db.addWarehouse(tempWarehouse);
+                                    Log.i("WW", temp.getString("name") + ", " + temp.getString("category") + ", " + tempIds.getInt(j));
+                                }
+//                                Log.i("warehouse added", tempWarehouse.toString());
+                            }
+                        }
+
+
+                        int qMessages = data.getInt("qMessages");
+                        JSONArray messages = data.getJSONArray("messages");
+
+                        Log.i("Users received", String.valueOf(qUsers));
+                        Log.i("Products received", String.valueOf(qProducts));
+                        editor = sharedPref.edit();
+                        editor.putBoolean(getString(R.string.intialSetup), true);
+                        editor.commit();
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+        }
+    };
 }

@@ -16,7 +16,7 @@
     <string name="equalsign">=</string>
     <string name="x">x</string>
     <string name="expiry_date">Expiry Date:</string>
-    <string name="preference_file_key">de.thehumanswissarmyknife.preferences</string>
+    <string name="preference_file_key">de.thehumanswissarmyknife.stockcount.preferences</string>
     <string name="intialSetup">intialSetup</string>
 
 

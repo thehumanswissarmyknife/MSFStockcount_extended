@@ -1,5 +1,13 @@
 package com.humanswissarmyknives.msfstockcount;
 
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
 /**
  * Created by dennisvocke on 13.07.17.
  * <p>
@@ -9,6 +17,7 @@ package com.humanswissarmyknives.msfstockcount;
 class Warehouse {
 
     int id;
+    String serverId;
     private String name;
     private String category;
     private int list_id;
@@ -17,6 +26,7 @@ class Warehouse {
 
     }
 
+    // region constructors
     public Warehouse(String name, String category, int list_id) {
         this.id = 0;
         this.name = name;
@@ -30,6 +40,8 @@ class Warehouse {
         this.category = category;
         this.list_id = list_id;
     }
+
+    // endregion
 
     public void setName(String name) {
         this.name = name;
@@ -47,6 +59,7 @@ class Warehouse {
         this.list_id = list_id;
     }
 
+
     public int getId() {
         return id;
     }
@@ -62,6 +75,7 @@ class Warehouse {
     int getList_id() {
         return list_id;
     }
+
 
     @Override
     public String toString() {
